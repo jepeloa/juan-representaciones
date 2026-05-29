@@ -1,0 +1,47 @@
+<div class="min-h-screen flex items-stretch bg-cream-50">
+    <!-- Left brand panel -->
+    <div class="hidden lg:flex flex-col items-center justify-center w-1/2 bg-gradient-to-br from-cream-50 via-cream-100 to-cream-200 p-12 relative overflow-hidden">
+        <div class="absolute -top-40 -right-40 w-96 h-96 bg-gold-200/40 rounded-full blur-3xl"></div>
+        <div class="absolute -bottom-40 -left-40 w-[28rem] h-[28rem] bg-brand-200/40 rounded-full blur-3xl"></div>
+
+        <div class="relative z-10 flex flex-col items-center">
+            <img src="logo_login.png" alt="JMG — Juan Manuel Garcia" class="w-80 object-contain"/>
+        </div>
+    </div>
+
+    <!-- Right form -->
+    <div class="flex-1 flex items-center justify-center px-6 bg-white">
+        <div class="w-full max-w-sm">
+            <!-- Mobile-only logo -->
+            <div class="lg:hidden mb-8 flex justify-center">
+                <img src="logo_login.png" alt="JMG" class="w-32 object-contain"/>
+            </div>
+
+            <h1 class="font-display text-3xl md:text-4xl font-bold text-brand-900 mb-2 text-center lg:text-left">Bienvenidos</h1>
+            <p class="text-sm text-slate-500 mb-8 text-center lg:text-left">Iniciá sesión para continuar.</p>
+
+            <form (ngSubmit)="submit()" class="space-y-5">
+                <div>
+                    <label class="label mb-1 block">Usuario</label>
+                    <input type="text" class="input" [(ngModel)]="username" name="username" autocomplete="username" autofocus />
+                </div>
+                <div>
+                    <label class="label mb-1 block">Contraseña</label>
+                    <input type="password" class="input" [(ngModel)]="password" name="password" autocomplete="current-password" />
+                </div>
+
+                <div *ngIf="error()" class="rounded-lg bg-blush-50 border border-blush-200 px-4 py-3 text-sm text-blush-500">
+                    {{ error() }}
+                </div>
+
+                <button type="submit" class="btn-primary w-full" [disabled]="loading()">
+                    <svg *ngIf="loading()" class="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                    </svg>
+                    {{ loading() ? 'Ingresando…' : 'Ingresar' }}
+                </button>
+            </form>
+        </div>
+    </div>
+</div>

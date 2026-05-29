@@ -1,0 +1,150 @@
+<div class="p-3 md:p-6 max-w-5xl mx-auto space-y-4 md:space-y-6">
+    <div class="flex items-end justify-between gap-3 flex-wrap">
+        <div>
+            <h2 class="font-display text-xl md:text-2xl font-bold text-slate-800">Usuarios</h2>
+            <p class="text-xs md:text-sm text-slate-500">Gestioná cuentas de administradores y clientes.</p>
+        </div>
+        <button class="btn-primary" (click)="openNew()">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4"><path d="M12 4v16m-8-8h16" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+            <span class="hidden sm:inline">Nuevo usuario</span>
+            <span class="sm:hidden">Nuevo</span>
+        </button>
+    </div>
+
+    <div *ngIf="successMsg()" class="rounded-lg bg-sage-50 border border-sage-200 px-4 py-3 text-sm text-sage-700">
+        ✓ {{ successMsg() }}
+    </div>
+    <div *ngIf="error()" class="rounded-lg bg-blush-50 border border-blush-200 px-4 py-3 text-sm text-blush-500">
+        {{ error() }}
+    </div>
+
+    <!-- Form -->
+    <form *ngIf="showForm()" (ngSubmit)="submit()" class="card p-6 space-y-4">
+        <div class="flex items-center justify-between">
+            <h3 class="font-display text-lg font-semibold text-slate-700">
+                {{ editingId() ? 'Editar usuario' : 'Nuevo usuario' }}
+            </h3>
+            <button type="button" class="btn-ghost text-sm" (click)="showForm.set(false)">Cancelar</button>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-4">
+            <div>
+                <label class="label mb-1 block">Usuario *</label>
+                <input class="input" [(ngModel)]="form.username" name="username" required minlength="2" [disabled]="!!editingId()"/>
+            </div>
+            <div>
+                <label class="label mb-1 block">Nombre completo</label>
+                <input class="input" [(ngModel)]="form.full_name" name="full_name"/>
+            </div>
+            <div>
+                <label class="label mb-1 block">
+                    Contraseña {{ editingId() ? '(dejar vacío para no cambiar)' : '*' }}
+                </label>
+                <input type="password" class="input" [(ngModel)]="form.password" name="password" autocomplete="new-password"/>
+            </div>
+            <div class="flex flex-col gap-2 justify-end pt-1">
+                <label class="inline-flex items-center gap-2 text-sm text-slate-600">
+                    <input type="checkbox" class="accent-brand-500 w-4 h-4" [(ngModel)]="form.is_admin" name="is_admin"/>
+                    Administrador
+                </label>
+                <label class="inline-flex items-center gap-2 text-sm text-slate-600">
+                    <input type="checkbox" class="accent-brand-500 w-4 h-4" [(ngModel)]="form.is_active" name="is_active"/>
+                    Activo
+                </label>
+            </div>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-2">
+            <button type="button" class="btn-ghost" (click)="showForm.set(false)">Cancelar</button>
+            <button type="submit" class="btn-primary" [disabled]="saving()">
+                {{ saving() ? 'Guardando…' : (editingId() ? 'Actualizar' : 'Crear') }}
+            </button>
+        </div>
+    </form>
+
+    <!-- Users table (desktop) -->
+    <div class="card overflow-x-auto hidden md:block">
+        <table class="w-full text-sm">
+            <thead class="bg-cream-100 text-slate-600 border-b border-cream-200">
+                <tr>
+                    <th class="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wider">Usuario</th>
+                    <th class="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wider">Nombre</th>
+                    <th class="py-3 px-4 text-center text-xs font-semibold uppercase tracking-wider w-28">Rol</th>
+                    <th class="py-3 px-4 text-center text-xs font-semibold uppercase tracking-wider w-28">Estado</th>
+                    <th class="py-3 px-4 text-right text-xs font-semibold uppercase tracking-wider w-40">Acciones</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-cream-100">
+                <tr *ngFor="let u of users()" class="hover:bg-cream-50">
+                    <td class="py-3 px-4 font-semibold text-slate-700">
+                        {{ u.username }}
+                        <span *ngIf="u.id === auth.user()?.id" class="ml-2 badge bg-sage-100 text-sage-700">vos</span>
+                    </td>
+                    <td class="py-3 px-4 text-slate-600">{{ u.full_name || '—' }}</td>
+                    <td class="py-3 px-4 text-center">
+                        <span class="badge" [class.bg-brand-100]="u.is_admin" [class.text-brand-700]="u.is_admin"
+                              [class.bg-cream-200]="!u.is_admin" [class.text-slate-600]="!u.is_admin">
+                            {{ u.is_admin ? 'Admin' : 'Cliente' }}
+                        </span>
+                    </td>
+                    <td class="py-3 px-4 text-center">
+                        <button class="badge cursor-pointer"
+                                [class.bg-sage-100]="u.is_active" [class.text-sage-700]="u.is_active"
+                                [class.bg-blush-100]="!u.is_active" [class.text-blush-500]="!u.is_active"
+                                (click)="toggleActive(u)"
+                                [disabled]="u.id === auth.user()?.id"
+                                title="Click para activar/desactivar">
+                            {{ u.is_active ? 'Activo' : 'Inactivo' }}
+                        </button>
+                    </td>
+                    <td class="py-3 px-4 text-right whitespace-nowrap">
+                        <button class="btn-ghost text-xs" (click)="editUser(u)">Editar</button>
+                        <button class="btn-ghost text-xs text-blush-500 hover:bg-blush-50"
+                                [disabled]="u.id === auth.user()?.id"
+                                (click)="confirmDelete(u)">Eliminar</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div *ngIf="!users().length && !loading()" class="py-10 text-center text-slate-400 text-sm">
+            No hay usuarios.
+        </div>
+    </div>
+
+    <!-- Users (mobile) -->
+    <div class="md:hidden space-y-2">
+        <div *ngFor="let u of users()" class="card p-3">
+            <div class="flex items-start justify-between gap-3">
+                <div class="flex-1 min-w-0">
+                    <p class="font-semibold text-slate-800 truncate">
+                        {{ u.username }}
+                        <span *ngIf="u.id === auth.user()?.id" class="ml-1 badge bg-sage-100 text-sage-700 text-[10px]">vos</span>
+                    </p>
+                    <p class="text-xs text-slate-500 truncate">{{ u.full_name || '—' }}</p>
+                </div>
+                <div class="flex flex-col items-end gap-1">
+                    <span class="badge" [class.bg-brand-100]="u.is_admin" [class.text-brand-700]="u.is_admin"
+                          [class.bg-cream-200]="!u.is_admin" [class.text-slate-600]="!u.is_admin">
+                        {{ u.is_admin ? 'Admin' : 'Cliente' }}
+                    </span>
+                    <button class="badge cursor-pointer"
+                            [class.bg-sage-100]="u.is_active" [class.text-sage-700]="u.is_active"
+                            [class.bg-blush-100]="!u.is_active" [class.text-blush-500]="!u.is_active"
+                            (click)="toggleActive(u)"
+                            [disabled]="u.id === auth.user()?.id">
+                        {{ u.is_active ? 'Activo' : 'Inactivo' }}
+                    </button>
+                </div>
+            </div>
+            <div class="flex justify-end gap-1 mt-2 border-t border-cream-100 pt-2">
+                <button class="btn-ghost text-xs" (click)="editUser(u)">Editar</button>
+                <button class="btn-ghost text-xs text-blush-500 hover:bg-blush-50"
+                        [disabled]="u.id === auth.user()?.id"
+                        (click)="confirmDelete(u)">Eliminar</button>
+            </div>
+        </div>
+        <div *ngIf="!users().length && !loading()" class="py-10 text-center text-slate-400 text-sm">
+            No hay usuarios.
+        </div>
+    </div>
+</div>

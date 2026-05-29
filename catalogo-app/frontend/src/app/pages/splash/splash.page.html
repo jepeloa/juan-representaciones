@@ -1,0 +1,16 @@
+<div
+    [class.animate-fade-out]="fading()"
+    class="fixed inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-cream-50 via-cream-100 to-cream-200 z-50">
+    <!-- Decorative blurred shapes -->
+    <div class="absolute -top-40 -right-40 w-96 h-96 bg-gold-200/30 rounded-full blur-3xl"></div>
+    <div class="absolute -bottom-40 -left-40 w-[28rem] h-[28rem] bg-brand-200/30 rounded-full blur-3xl"></div>
+
+    <div class="relative animate-scale-in flex flex-col items-center">
+        <img src="logo.png" alt="JMG" class="w-56 md:w-72 object-contain"/>
+        <div class="mt-10 flex items-center gap-2">
+            <span class="block w-2 h-2 rounded-full bg-brand-600 animate-pulse"></span>
+            <span class="block w-2 h-2 rounded-full bg-gold-500 animate-pulse" style="animation-delay: 150ms"></span>
+            <span class="block w-2 h-2 rounded-full bg-brand-400 animate-pulse" style="animation-delay: 300ms"></span>
+        </div>
+    </div>
+</div>

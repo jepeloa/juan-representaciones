@@ -1,0 +1,126 @@
+<div class="flex h-screen overflow-hidden bg-cream-50">
+    <!-- Mobile backdrop -->
+    <div *ngIf="mobileOpen()"
+         class="md:hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-30"
+         (click)="toggleMobile()"></div>
+
+    <!-- Sidebar -->
+    <aside
+        [class.md:w-64]="!sidebarCollapsed()"
+        [class.md:w-20]="sidebarCollapsed()"
+        [class.translate-x-0]="mobileOpen()"
+        [class.-translate-x-full]="!mobileOpen()"
+        class="fixed md:relative md:translate-x-0 md:flex w-64 h-full flex-col bg-white border-r border-cream-200 text-slate-600 transition-all duration-200 shadow-pastel z-40"
+    >
+        <!-- Brand + close (mobile) -->
+        <div class="flex items-center gap-3 px-4 py-4 border-b border-cream-200">
+            <img *ngIf="sidebarCollapsed() && !mobileOpen(); else fullLogo"
+                 src="logo.png" alt="JMG" class="w-12 h-12 object-contain shrink-0 mx-auto"/>
+            <ng-template #fullLogo>
+                <img src="logo.png" alt="JMG — Juan Manuel Garcia"
+                     class="flex-1 max-w-[180px] object-contain"/>
+            </ng-template>
+            <button class="md:hidden p-2 -mr-2 text-slate-400 hover:text-slate-700"
+                    (click)="toggleMobile()" aria-label="Cerrar menú">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Nav -->
+        <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+            <a *ngFor="let item of nav()"
+               [routerLink]="item.route"
+               routerLinkActive="bg-brand-50 text-brand-700 font-semibold"
+               [routerLinkActiveOptions]="{exact: false}"
+               class="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-cream-100 hover:text-slate-800 transition"
+               [title]="(sidebarCollapsed() && !mobileOpen()) ? item.label : ''"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 shrink-0">
+                    <path [attr.d]="item.icon"/>
+                </svg>
+                <span *ngIf="!sidebarCollapsed() || mobileOpen()" class="truncate flex-1">{{ item.label }}</span>
+                <span *ngIf="item.showBadge && cart.count() > 0"
+                      class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-brand-500 text-white text-xs font-bold">
+                    {{ cart.count() }}
+                </span>
+            </a>
+        </nav>
+
+        <!-- Collapse (desktop only) -->
+        <button
+            (click)="toggleSidebar()"
+            class="hidden md:flex m-3 items-center justify-center rounded-lg py-2 text-slate-400 hover:bg-cream-100 hover:text-slate-600 transition"
+            aria-label="Colapsar menú"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"
+                 [class.rotate-180]="sidebarCollapsed()">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/>
+            </svg>
+        </button>
+    </aside>
+
+    <!-- Main column -->
+    <div class="flex-1 flex flex-col overflow-hidden">
+        <!-- Top bar -->
+        <header class="flex items-center gap-2 bg-white border-b border-cream-200 px-3 md:px-6 h-14 md:h-16 shrink-0 shadow-soft z-10">
+            <button class="md:hidden p-2 -ml-1 rounded hover:bg-cream-100"
+                    (click)="toggleMobile()" aria-label="Abrir menú">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/>
+                </svg>
+            </button>
+
+            <!-- Mobile: show compact logo when sidebar is closed -->
+            <div class="md:hidden flex items-center gap-2">
+                <img src="logo.png" alt="JMG" class="h-9 object-contain"/>
+            </div>
+
+            <h1 class="hidden md:block font-display text-base md:text-lg font-bold text-brand-900">Catálogo</h1>
+            <div class="flex-1"></div>
+
+            <!-- Cart shortcut (mobile) -->
+            <a routerLink="/carrito"
+               class="md:hidden relative w-10 h-10 rounded-full flex items-center justify-center text-slate-600 hover:bg-cream-100">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"/>
+                </svg>
+                <span *ngIf="cart.count() > 0"
+                      class="absolute -top-0.5 -right-0.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-brand-500 text-white text-[10px] font-bold border-2 border-white">
+                    {{ cart.count() }}
+                </span>
+            </a>
+
+            <!-- User menu -->
+            <div class="relative">
+                <button
+                    (click)="toggleUserMenu()"
+                    class="flex items-center gap-2 rounded-full pl-1 pr-2 md:pr-3 py-1 hover:bg-cream-100 transition"
+                >
+                    <div class="w-9 h-9 rounded-full bg-sage-100 text-sage-700 flex items-center justify-center font-semibold uppercase">
+                        {{ (auth.user()?.full_name || auth.user()?.username || '?')[0] }}
+                    </div>
+                    <span class="hidden md:inline text-sm font-medium text-slate-700">
+                        {{ auth.user()?.full_name || auth.user()?.username }}
+                    </span>
+                </button>
+                <div *ngIf="userMenuOpen()"
+                     class="absolute right-0 mt-2 w-56 rounded-lg bg-white shadow-lift border border-cream-200 py-1 z-50">
+                    <div class="px-4 py-2 border-b border-cream-200">
+                        <p class="text-sm font-semibold text-slate-800">{{ auth.user()?.full_name || auth.user()?.username }}</p>
+                        <p class="text-xs text-slate-500">{{ auth.user()?.is_admin ? 'Administrador' : 'Cliente' }}</p>
+                    </div>
+                    <button (click)="logout()" class="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-cream-50">
+                        Cerrar sesión
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Content -->
+        <main class="flex-1 overflow-y-auto bg-cream-50">
+            <router-outlet></router-outlet>
+        </main>
+    </div>
+</div>

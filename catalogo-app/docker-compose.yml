@@ -1,0 +1,66 @@
+services:
+    mysql:
+        image: mysql:8.0
+        container_name: catalogo-mysql
+        restart: unless-stopped
+        environment:
+            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+            MYSQL_DATABASE: ${DB_NAME:-catalogo}
+            MYSQL_USER: ${DB_USER:-catalogo}
+            MYSQL_PASSWORD: ${DB_PASSWORD:-catalogo}
+        volumes:
+            - mysql_data:/var/lib/mysql
+        healthcheck:
+            test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-rootpassword}"]
+            interval: 10s
+            timeout: 5s
+            retries: 10
+        networks:
+            - catalogo-net
+
+    backend:
+        build: ./backend
+        container_name: catalogo-backend
+        restart: unless-stopped
+        environment:
+            DB_HOST: mysql
+            DB_PORT: 3306
+            DB_NAME: ${DB_NAME:-catalogo}
+            DB_USER: ${DB_USER:-catalogo}
+            DB_PASSWORD: ${DB_PASSWORD:-catalogo}
+            JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
+            JWT_EXPIRE_MINUTES: 10080
+            INITIAL_ADMIN_USER: ${INITIAL_ADMIN_USER:-juan}
+            INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD:-juan2026}
+            CORS_ORIGINS: "*"
+        volumes:
+            # Mounted so the import script can read the local Excel + images
+            - ${DATA_DIR:-./data}:/data:ro
+            # Writable: admin upload destination
+            - ${UPLOADS_DIR:-./data/uploads}:/srv/uploads
+        depends_on:
+            mysql:
+                condition: service_healthy
+        networks:
+            - catalogo-net
+
+    frontend:
+        build: ./frontend
+        container_name: catalogo-frontend
+        restart: unless-stopped
+        ports:
+            - "${FRONTEND_PORT:-8003}:80"
+        volumes:
+            - ${IMAGES_DIR:-./data/images}:/srv/images:ro
+            - ${UPLOADS_DIR:-./data/uploads}:/srv/uploads:ro
+        depends_on:
+            - backend
+        networks:
+            - catalogo-net
+
+networks:
+    catalogo-net:
+        driver: bridge
+
+volumes:
+    mysql_data:

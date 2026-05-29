@@ -1,0 +1,15 @@
+:8002 {
+	root * /srv/catalogo
+	encode gzip
+	file_server
+	basic_auth {
+		juan $2a$14$bMK.u8HvwIxQs3G6Kn7uHeKu2YzV6pEtMkjAchSIw8eUoJkXgH0LK
+	}
+	@html {
+		path / /index.html /catalogo.html
+	}
+	rewrite / /catalogo.html
+	log {
+		output file /var/log/caddy/catalogo.log
+	}
+}

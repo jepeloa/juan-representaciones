@@ -1,0 +1,59 @@
+# ───────────────────────── Datos / assets (se manejan aparte) ─────────────────────────
+# Listas de precios fuente (PDFs/xlsx), salidas generadas e imágenes
+Listas actualizadas/
+Listas actualizadas_old/
+images/
+media/
+screenshots/
+backups/
+sam_models/
+*.zip
+*.pdf
+*.docx
+*.xlsx
+*.xls
+catalogo.html
+clip_matches.json
+e2e_report.txt
+manifest.json
+
+# Modelos / pesos
+*.pth
+*.pt
+*.onnx
+*.safetensors
+
+# Windows Alternate Data Streams / lock files
+*:Zone.Identifier
+.~lock.*#
+*.tmp
+
+# ───────────────────────── Python ─────────────────────────
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+
+# Secretos / entorno (NUNCA subir credenciales reales)
+.env
+*.env
+!.env.example
+*.pem
+*.key
+id_rsa*
+
+# ───────────────────────── Node / Angular (frontend) ─────────────────────────
+node_modules/
+dist/
+.angular/
+*.log
+npm-debug.log*
+
+# ───────────────────────── Editor / OS ─────────────────────────
+.DS_Store
+.idea/
+.vscode/
+.claude/
