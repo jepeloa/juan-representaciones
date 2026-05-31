@@ -57,7 +57,7 @@ export class ShellComponent {
             adminOnly: true,
         },
         {
-            label: 'Formas de pago',
+            label: 'Forma de pago',
             route: '/admin/formas-pago',
             icon: 'M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3M3.75 5.25h16.5c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125H3.75c-.621 0-1.125-.504-1.125-1.125V6.375c0-.621.504-1.125 1.125-1.125Z',
             adminOnly: true,

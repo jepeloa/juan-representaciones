@@ -42,7 +42,7 @@ export interface ProductFormData {
     unit_per_pack?: number | null;
     barcode?: string | null;
     notes?: string | null;
-    payment_term_id?: number | null;
+    payment_term_ids?: number[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -67,9 +67,9 @@ export class AdminService {
     private toFormData(body: ProductFormData, files: File[] = [], extra: Record<string, string> = {}): FormData {
         const fd = new FormData();
         Object.entries(body).forEach(([k, v]) => {
-            // payment_term_id se envía siempre (incluso vacío) para poder limpiarlo
-            if (k === 'payment_term_id') {
-                fd.append(k, v === null || v === undefined ? '' : String(v));
+            // payment_term_ids se envía siempre como CSV (incluso vacío) para poder limpiar
+            if (k === 'payment_term_ids') {
+                fd.append(k, Array.isArray(v) ? v.join(',') : '');
                 return;
             }
             if (v !== null && v !== undefined && v !== '') fd.append(k, String(v));

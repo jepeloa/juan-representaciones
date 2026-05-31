@@ -105,13 +105,22 @@ export class AdminProductsPage implements OnInit {
             unit_per_pack: null,
             barcode: null,
             notes: null,
-            payment_term_id: null,
+            payment_term_ids: [],
         };
     }
 
     loadPaymentTerms(supplierId: number | null) {
         if (!supplierId) { this.paymentTerms.set([]); return; }
         this.admin.listPaymentTerms(supplierId, true).subscribe(t => this.paymentTerms.set(t));
+    }
+
+    isTermSelected(id: number): boolean {
+        return (this.form.payment_term_ids ?? []).includes(id);
+    }
+
+    togglePaymentTerm(id: number) {
+        const cur = this.form.payment_term_ids ?? [];
+        this.form.payment_term_ids = cur.includes(id) ? cur.filter(x => x !== id) : [...cur, id];
     }
 
     openNew() {
@@ -144,7 +153,7 @@ export class AdminProductsPage implements OnInit {
             price: p.price !== null && p.price !== undefined ? String(p.price) : null,
             currency: p.currency,
             iva: p.iva,
-            payment_term_id: p.payment_term_id,
+            payment_term_ids: (p.payment_terms ?? []).map(t => t.id),
         };
         this.useNewSupplier = false;
         this.useNewCategory = false;
@@ -165,7 +174,7 @@ export class AdminProductsPage implements OnInit {
 
     onSupplierSelect() {
         this.form.category_id = null;
-        this.form.payment_term_id = null;
+        this.form.payment_term_ids = [];
         this.newCategoryName = '';
         this.useNewCategory = false;
         if (this.form.supplier_id) {

@@ -110,17 +110,26 @@
             </div>
         </div>
 
-        <!-- Condición de pago -->
+        <!-- Formas de pago (varias) -->
         <div>
-            <label class="label mb-1 block">Condición de pago</label>
-            <select class="input" [(ngModel)]="form.payment_term_id" name="payment_term_id" [disabled]="!form.supplier_id">
-                <option [ngValue]="null">— Sin condición —</option>
-                <option *ngFor="let t of paymentTerms()" [ngValue]="t.id">{{ t.text }}</option>
-            </select>
-            <p class="text-xs text-slate-400 mt-1">
-                <span *ngIf="!form.supplier_id">Elegí un proveedor para ver sus condiciones de pago.</span>
-                <span *ngIf="form.supplier_id && !paymentTerms().length">Este proveedor no tiene condiciones cargadas. Cargalas en “Formas de pago”.</span>
-                <span *ngIf="form.supplier_id && paymentTerms().length">Aparece agrupada en la orden. Se gestionan en “Formas de pago”.</span>
+            <label class="label mb-1 block">Formas de pago</label>
+            <p *ngIf="!form.supplier_id" class="text-xs text-slate-400">Elegí un proveedor para ver sus formas de pago.</p>
+            <p *ngIf="form.supplier_id && !paymentTerms().length" class="text-xs text-slate-400">
+                Este proveedor no tiene formas de pago cargadas. Cargalas en “Forma de pago”.
+            </p>
+            <div *ngIf="form.supplier_id && paymentTerms().length" class="flex flex-wrap gap-2">
+                <label *ngFor="let t of paymentTerms()"
+                       class="inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-sm cursor-pointer select-none"
+                       [class.border-brand-400]="isTermSelected(t.id)"
+                       [class.bg-brand-50]="isTermSelected(t.id)"
+                       [class.border-cream-200]="!isTermSelected(t.id)">
+                    <input type="checkbox" class="accent-brand-500 w-4 h-4"
+                           [checked]="isTermSelected(t.id)" (change)="togglePaymentTerm(t.id)"/>
+                    {{ t.text }}
+                </label>
+            </div>
+            <p *ngIf="form.supplier_id && paymentTerms().length" class="text-xs text-slate-400 mt-1">
+                Podés elegir varias. Se listan en la orden. Se gestionan en “Forma de pago”.
             </p>
         </div>
 

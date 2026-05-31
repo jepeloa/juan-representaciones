@@ -44,7 +44,6 @@ class ProductWriteIn(BaseModel):
     unit_per_pack: int | None = None
     barcode: str | None = Field(default=None, max_length=60)
     notes: str | None = None
-    payment_term_id: int | None = None
 
 
 # ===== Payment terms (condición de pago en texto libre, por producto) =====

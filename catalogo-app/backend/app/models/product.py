@@ -1,8 +1,17 @@
 from decimal import Decimal
-from sqlalchemy import String, Text, ForeignKey, Numeric, Integer, Index
+from sqlalchemy import String, Text, ForeignKey, Numeric, Integer, Index, Table, Column
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
+
+
+# Asociación N-a-N: un producto puede tener varias condiciones de pago (forma de pago)
+product_payment_terms = Table(
+    'product_payment_terms',
+    Base.metadata,
+    Column('product_id', ForeignKey('products.id', ondelete='CASCADE'), primary_key=True),
+    Column('payment_term_id', ForeignKey('payment_terms.id', ondelete='CASCADE'), primary_key=True),
+)
 
 
 class Product(Base):
@@ -15,10 +24,6 @@ class Product(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     supplier_id: Mapped[int] = mapped_column(ForeignKey('suppliers.id', ondelete='CASCADE'), index=True)
     category_id: Mapped[int | None] = mapped_column(ForeignKey('categories.id', ondelete='SET NULL'), nullable=True, index=True)
-
-    payment_term_id: Mapped[int | None] = mapped_column(
-        ForeignKey('payment_terms.id', ondelete='SET NULL'), nullable=True, index=True
-    )
 
     code: Mapped[str | None] = mapped_column(String(120), nullable=True, index=True)
     name: Mapped[str] = mapped_column(String(500))
@@ -34,7 +39,9 @@ class Product(Base):
 
     supplier: Mapped['Supplier'] = relationship(back_populates='products')  # noqa: F821
     category: Mapped['Category | None'] = relationship(back_populates='products')  # noqa: F821
-    payment_term: Mapped['PaymentTerm | None'] = relationship()  # noqa: F821
+    payment_terms: Mapped[list['PaymentTerm']] = relationship(  # noqa: F821
+        secondary=product_payment_terms, lazy='selectin', order_by='PaymentTerm.sort_order',
+    )
     images: Mapped[list['ProductImage']] = relationship(
         back_populates='product', cascade='all, delete-orphan', order_by='ProductImage.position'
     )

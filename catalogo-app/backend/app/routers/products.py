@@ -7,7 +7,8 @@ from app.auth.deps import get_current_user
 from app.database import get_db
 from app.models import Product, Supplier, Category, ProductImage, User
 from app.schemas import (
-    ProductOut, ProductDetailOut, ProductListOut, FacetsOut, SupplierOut, ProductImageOut
+    ProductOut, ProductDetailOut, ProductListOut, FacetsOut, SupplierOut, ProductImageOut,
+    PaymentTermBrief,
 )
 
 router = APIRouter(prefix='/api/products', tags=['products'])
@@ -27,8 +28,7 @@ def _row_to_out(product: Product) -> ProductOut:
         supplier_name=product.supplier.name if product.supplier else '',
         category_id=product.category_id,
         category_name=product.category.name if product.category else None,
-        payment_term_id=product.payment_term_id,
-        payment_term=product.payment_term.text if product.payment_term else None,
+        payment_terms=[PaymentTermBrief(id=t.id, text=t.text) for t in product.payment_terms],
         thumbnail=thumb,
     )
 
@@ -51,7 +51,7 @@ def list_products(
         selectinload(Product.supplier),
         selectinload(Product.category),
         selectinload(Product.images),
-        selectinload(Product.payment_term),
+        selectinload(Product.payment_terms),
     )
     if supplier_id:
         stmt = stmt.where(Product.supplier_id == supplier_id)
