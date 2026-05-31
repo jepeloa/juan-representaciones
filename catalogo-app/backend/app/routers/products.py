@@ -1,6 +1,6 @@
 from decimal import Decimal
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import select, func, or_
+from sqlalchemy import select, func, or_, and_, case
 from sqlalchemy.orm import Session, selectinload
 
 from app.auth.deps import get_current_user
@@ -33,13 +33,13 @@ def _row_to_out(product: Product) -> ProductOut:
 
 @router.get('', response_model=ProductListOut)
 def list_products(
-    q: str | None = Query(None, description='Búsqueda full-text en nombre/código/descripción'),
+    q: str | None = Query(None, description='Búsqueda por palabras en nombre/código/descripción/categoría, con ranking de relevancia'),
     supplier_id: int | None = None,
     category_id: int | None = None,
     currency: str | None = None,
     max_price: Decimal | None = None,
     min_price: Decimal | None = None,
-    sort: str = Query('name', pattern='^(name|price|code|supplier|category|-name|-price|-code|-supplier|-category)$'),
+    sort: str = Query('name', pattern='^(relevance|name|price|code|supplier|category|-name|-price|-code|-supplier|-category)$'),
     page: int = Query(1, ge=1),
     page_size: int = Query(60, ge=1, le=200),
     db: Session = Depends(get_db),
@@ -60,28 +60,61 @@ def list_products(
         stmt = stmt.where(Product.price <= max_price)
     if min_price is not None:
         stmt = stmt.where(Product.price >= min_price)
-    if q:
-        pattern = f'%{q.strip()}%'
-        stmt = stmt.where(or_(
-            Product.name.ilike(pattern),
-            Product.code.ilike(pattern),
-            Product.description.ilike(pattern),
-        ))
-
-    # Sorting
-    desc = sort.startswith('-')
     key = sort.lstrip('-')
-    sort_map = {
-        'name': Product.name,
-        'price': Product.price,
-        'code': Product.code,
-        'supplier': Supplier.name,
-        'category': Category.name,
-    }
-    sort_col = sort_map[key]
-    if key in ('supplier', 'category'):
-        stmt = stmt.join(Supplier if key == 'supplier' else Category, isouter=True)
-    stmt = stmt.order_by(sort_col.desc() if desc else sort_col.asc(), Product.id.asc())
+    desc = sort.startswith('-')
+
+    # Joins para filtrar/ordenar (evitando duplicar el join a Category)
+    joined_category = False
+    if key == 'supplier':
+        stmt = stmt.join(Supplier, isouter=True)
+
+    # Búsqueda: cada palabra debe aparecer (AND) en nombre/código/descripción/categoría,
+    # con ranking de relevancia: nombre > categoría > código > descripción.
+    relevance = None
+    if q:
+        raw = q.strip()
+        tokens = [t for t in raw.split() if t] or [raw]
+        stmt = stmt.join(Category, isouter=True)
+        joined_category = True
+        for t in tokens:
+            tp = f'%{t}%'
+            stmt = stmt.where(or_(
+                Product.name.ilike(tp),
+                Product.code.ilike(tp),
+                Product.description.ilike(tp),
+                Category.name.ilike(tp),
+            ))
+        full = f'%{raw}%'
+        prefix = f'{raw}%'
+        name_all_tokens = and_(*[Product.name.ilike(f'%{t}%') for t in tokens])
+        relevance = case(
+            (Product.name.ilike(prefix), 5),    # el nombre empieza con lo buscado
+            (Product.name.ilike(full), 4),       # el nombre contiene la frase exacta
+            (name_all_tokens, 3),                # el nombre contiene todas las palabras
+            (Category.name.ilike(full), 2),      # matchea por categoría
+            (Product.code.ilike(full), 2),       # matchea por código
+            else_=1,                             # matcheó solo por descripción
+        )
+
+    if key == 'category' and not joined_category:
+        stmt = stmt.join(Category, isouter=True)
+
+    # Orden: por relevancia cuando hay búsqueda y el sort es el default ('name')
+    # o explícito ('relevance'); en otro caso, por la columna pedida.
+    if relevance is not None and sort in ('name', 'relevance'):
+        stmt = stmt.order_by(relevance.desc(), Product.name.asc(), Product.id.asc())
+    else:
+        if key == 'relevance':
+            key = 'name'  # sin búsqueda, 'relevance' no aplica
+        sort_map = {
+            'name': Product.name,
+            'price': Product.price,
+            'code': Product.code,
+            'supplier': Supplier.name,
+            'category': Category.name,
+        }
+        sort_col = sort_map[key]
+        stmt = stmt.order_by(sort_col.desc() if desc else sort_col.asc(), Product.id.asc())
 
     total = db.execute(select(func.count()).select_from(stmt.order_by(None).subquery())).scalar_one()
     rows = db.execute(stmt.offset((page - 1) * page_size).limit(page_size)).scalars().all()
