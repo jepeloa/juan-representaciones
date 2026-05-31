@@ -16,6 +16,10 @@ class Product(Base):
     supplier_id: Mapped[int] = mapped_column(ForeignKey('suppliers.id', ondelete='CASCADE'), index=True)
     category_id: Mapped[int | None] = mapped_column(ForeignKey('categories.id', ondelete='SET NULL'), nullable=True, index=True)
 
+    payment_term_id: Mapped[int | None] = mapped_column(
+        ForeignKey('payment_terms.id', ondelete='SET NULL'), nullable=True, index=True
+    )
+
     code: Mapped[str | None] = mapped_column(String(120), nullable=True, index=True)
     name: Mapped[str] = mapped_column(String(500))
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
@@ -30,6 +34,7 @@ class Product(Base):
 
     supplier: Mapped['Supplier'] = relationship(back_populates='products')  # noqa: F821
     category: Mapped['Category | None'] = relationship(back_populates='products')  # noqa: F821
+    payment_term: Mapped['PaymentTerm | None'] = relationship()  # noqa: F821
     images: Mapped[list['ProductImage']] = relationship(
         back_populates='product', cascade='all, delete-orphan', order_by='ProductImage.position'
     )

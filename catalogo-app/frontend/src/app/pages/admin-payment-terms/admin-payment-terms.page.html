@@ -1,0 +1,123 @@
+<div class="p-3 md:p-6 max-w-5xl mx-auto space-y-4 md:space-y-6">
+    <div>
+        <h2 class="font-display text-xl md:text-2xl font-bold text-slate-800">Formas de pago</h2>
+        <p class="text-xs md:text-sm text-slate-500">
+            Condiciones de pago en texto libre, asociadas a un proveedor. Después se asignan a cada producto
+            y aparecen agrupadas en la orden.
+        </p>
+    </div>
+
+    <div *ngIf="successMsg()" class="rounded-lg bg-sage-50 border border-sage-200 px-4 py-3 text-sm text-sage-700">
+        ✓ {{ successMsg() }}
+    </div>
+    <div *ngIf="error()" class="rounded-lg bg-blush-50 border border-blush-200 px-4 py-3 text-sm text-blush-500">
+        {{ error() }}
+    </div>
+
+    <div class="card overflow-hidden">
+        <div class="flex items-center justify-between p-4 border-b border-cream-200 bg-cream-50">
+            <h3 class="font-display text-lg font-semibold text-slate-800">Condiciones de pago</h3>
+            <button class="btn-primary text-sm" (click)="openNew()">+ Nueva condición</button>
+        </div>
+
+        <form *ngIf="showForm()" (ngSubmit)="save()" class="p-5 bg-cream-50 border-b border-cream-200 space-y-4">
+            <div>
+                <label class="label mb-1 block">Condición de pago *</label>
+                <textarea class="input" rows="2" [(ngModel)]="form.text" name="ptext" required
+                          placeholder="ej. 30% anticipo, saldo contra entrega · Cheques hasta 60 días"></textarea>
+            </div>
+            <div class="grid md:grid-cols-3 gap-4">
+                <div class="md:col-span-1">
+                    <label class="label mb-1 block">Proveedor</label>
+                    <select class="input" [ngModel]="form.supplier_id" (ngModelChange)="form.supplier_id = $event" name="psupplier">
+                        <option [ngValue]="null">Todos (global)</option>
+                        <option *ngFor="let s of suppliers()" [ngValue]="s.id">{{ s.name }}</option>
+                    </select>
+                    <p class="text-xs text-slate-400 mt-1">Limita esta condición a un proveedor (o dejala global).</p>
+                </div>
+                <div>
+                    <label class="label mb-1 block">Orden</label>
+                    <input class="input" type="number" [(ngModel)]="form.sort_order" name="porder"/>
+                </div>
+                <div class="flex items-end">
+                    <label class="inline-flex items-center gap-2 text-sm text-slate-700">
+                        <input type="checkbox" class="accent-brand-500 w-4 h-4" [(ngModel)]="form.is_active" name="pactive"/>
+                        Activa
+                    </label>
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 pt-2">
+                <button type="button" class="btn-ghost" (click)="showForm.set(false)">Cancelar</button>
+                <button type="submit" class="btn-primary" [disabled]="saving()">
+                    {{ saving() ? 'Guardando…' : (editingId() ? 'Actualizar' : 'Crear') }}
+                </button>
+            </div>
+        </form>
+
+        <!-- Desktop table -->
+        <div class="hidden md:block overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-white text-slate-600 border-b border-cream-200">
+                    <tr>
+                        <th class="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wider w-12">#</th>
+                        <th class="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wider">Condición</th>
+                        <th class="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wider w-56">Proveedor</th>
+                        <th class="py-3 px-4 text-center text-xs font-semibold uppercase tracking-wider w-24">Estado</th>
+                        <th class="py-3 px-4 text-right text-xs font-semibold uppercase tracking-wider w-40">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-cream-100">
+                    <tr *ngFor="let t of terms()" class="hover:bg-cream-50">
+                        <td class="py-3 px-4 text-slate-400 text-xs">{{ t.sort_order }}</td>
+                        <td class="py-3 px-4 text-slate-800">{{ t.text }}</td>
+                        <td class="py-3 px-4 text-slate-600">
+                            <span *ngIf="t.supplier_name" class="badge bg-brand-50 text-brand-700">{{ t.supplier_name }}</span>
+                            <span *ngIf="!t.supplier_name" class="text-slate-400 text-xs">Todos (global)</span>
+                        </td>
+                        <td class="py-3 px-4 text-center">
+                            <span class="badge"
+                                  [class.bg-sage-100]="t.is_active" [class.text-sage-700]="t.is_active"
+                                  [class.bg-blush-100]="!t.is_active" [class.text-blush-500]="!t.is_active">
+                                {{ t.is_active ? 'Activa' : 'Inactiva' }}
+                            </span>
+                        </td>
+                        <td class="py-3 px-4 text-right whitespace-nowrap">
+                            <button class="btn-ghost text-xs" (click)="edit(t)">Editar</button>
+                            <button class="btn-ghost text-xs text-blush-500 hover:bg-blush-50" (click)="confirmDelete(t)">Eliminar</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div *ngIf="!terms().length && !loading()" class="py-10 text-center text-slate-400 text-sm">
+                No hay condiciones cargadas. Creá la primera con “+ Nueva condición”.
+            </div>
+        </div>
+
+        <!-- Mobile list -->
+        <div class="md:hidden divide-y divide-cream-100">
+            <div *ngFor="let t of terms()" class="p-3">
+                <div class="flex items-start justify-between gap-2">
+                    <div class="flex-1 min-w-0">
+                        <p class="text-slate-800">{{ t.text }}</p>
+                        <p class="text-xs mt-1">
+                            <span *ngIf="t.supplier_name" class="badge bg-brand-50 text-brand-700">{{ t.supplier_name }}</span>
+                            <span *ngIf="!t.supplier_name" class="text-slate-400">Todos (global)</span>
+                        </p>
+                    </div>
+                    <span class="badge shrink-0"
+                          [class.bg-sage-100]="t.is_active" [class.text-sage-700]="t.is_active"
+                          [class.bg-blush-100]="!t.is_active" [class.text-blush-500]="!t.is_active">
+                        {{ t.is_active ? 'Activa' : 'Inactiva' }}
+                    </span>
+                </div>
+                <div class="flex justify-end gap-1 mt-2 border-t border-cream-100 pt-2">
+                    <button class="btn-ghost text-xs" (click)="edit(t)">Editar</button>
+                    <button class="btn-ghost text-xs text-blush-500 hover:bg-blush-50" (click)="confirmDelete(t)">Eliminar</button>
+                </div>
+            </div>
+            <div *ngIf="!terms().length && !loading()" class="py-10 text-center text-slate-400 text-sm">
+                No hay condiciones cargadas.
+            </div>
+        </div>
+    </div>
+</div>

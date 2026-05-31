@@ -37,18 +37,33 @@ def _fmt_money_short(v, currency: str | None) -> str:
 
 
 def _render_html_body(order: Order, user: User, company: str) -> str:
-    rows = []
+    # Agrupar por condición de pago, preservando el orden de aparición
+    groups: list[tuple[str | None, list]] = []
+    gindex: dict[str | None, int] = {}
     for it in order.items:
+        key = it.payment_term or None
+        if key not in gindex:
+            gindex[key] = len(groups)
+            groups.append((key, []))
+        groups[gindex[key]][1].append(it)
+
+    rows = []
+    for term_text, gitems in groups:
+        glabel = f'Condición de pago: {term_text}' if term_text else 'Sin condición de pago'
         rows.append(
-            f"<tr>"
-            f"<td style='padding:8px;border-bottom:1px solid #efe8d3;color:#384c60'>{it.product_name}"
-            f"{f'<br><small style=color:#6e8478>{it.supplier_name}</small>' if it.supplier_name else ''}</td>"
-            f"<td style='padding:8px;border-bottom:1px solid #efe8d3;color:#6f8ca6;font-family:monospace;font-size:11px'>{it.product_code or ''}</td>"
-            f"<td style='padding:8px;border-bottom:1px solid #efe8d3;text-align:right'>{it.quantity}</td>"
-            f"<td style='padding:8px;border-bottom:1px solid #efe8d3;text-align:right'>{_fmt_money_short(it.unit_price_final, it.currency)}</td>"
-            f"<td style='padding:8px;border-bottom:1px solid #efe8d3;text-align:right;font-weight:600'>{_fmt_money_short(it.line_total, it.currency)}</td>"
-            f"</tr>"
+            f"<tr><td colspan='5' style='padding:12px 8px 4px;color:#6e8478;font-weight:700;font-size:12px'>{glabel}</td></tr>"
         )
+        for it in gitems:
+            rows.append(
+                f"<tr>"
+                f"<td style='padding:8px;border-bottom:1px solid #efe8d3;color:#384c60'>{it.product_name}"
+                f"{f'<br><small style=color:#6e8478>{it.supplier_name}</small>' if it.supplier_name else ''}</td>"
+                f"<td style='padding:8px;border-bottom:1px solid #efe8d3;color:#6f8ca6;font-family:monospace;font-size:11px'>{it.product_code or ''}</td>"
+                f"<td style='padding:8px;border-bottom:1px solid #efe8d3;text-align:right'>{it.quantity}</td>"
+                f"<td style='padding:8px;border-bottom:1px solid #efe8d3;text-align:right'>{_fmt_money_short(it.unit_price_final, it.currency)}</td>"
+                f"<td style='padding:8px;border-bottom:1px solid #efe8d3;text-align:right;font-weight:600'>{_fmt_money_short(it.line_total, it.currency)}</td>"
+                f"</tr>"
+            )
     totals = []
     if order.total_ars and float(order.total_ars) > 0:
         totals.append(f"<tr><td colspan=4 style='padding:8px;text-align:right;font-weight:600;color:#384c60'>Total ARS</td>"

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
-import { CartService, Order, PaymentCondition, PublicSettings } from '../../core/cart.service';
+import { CartService, CartItem, Order, PaymentCondition, PublicSettings } from '../../core/cart.service';
 
 @Component({
     selector: 'app-cart',
@@ -29,6 +29,21 @@ export class CartPage implements OnInit {
     multiplier = computed(() => {
         const c = this.selectedCondition();
         return c ? Number(c.multiplier) : 1;
+    });
+
+    // Agrupa los ítems del carrito por su condición de pago (preservando orden)
+    groupedItems = computed<{ term: string | null; items: CartItem[] }[]>(() => {
+        const groups: { term: string | null; items: CartItem[] }[] = [];
+        const index = new Map<string | null, number>();
+        for (const it of this.cart.items()) {
+            const key = it.product.payment_term || null;
+            if (!index.has(key)) {
+                index.set(key, groups.length);
+                groups.push({ term: key, items: [] });
+            }
+            groups[index.get(key)!].items.push(it);
+        }
+        return groups;
     });
 
     subtotalsByCurrency = computed(() => {

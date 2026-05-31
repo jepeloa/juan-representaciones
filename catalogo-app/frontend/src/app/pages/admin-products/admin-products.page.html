@@ -110,6 +110,20 @@
             </div>
         </div>
 
+        <!-- Condición de pago -->
+        <div>
+            <label class="label mb-1 block">Condición de pago</label>
+            <select class="input" [(ngModel)]="form.payment_term_id" name="payment_term_id" [disabled]="!form.supplier_id">
+                <option [ngValue]="null">— Sin condición —</option>
+                <option *ngFor="let t of paymentTerms()" [ngValue]="t.id">{{ t.text }}</option>
+            </select>
+            <p class="text-xs text-slate-400 mt-1">
+                <span *ngIf="!form.supplier_id">Elegí un proveedor para ver sus condiciones de pago.</span>
+                <span *ngIf="form.supplier_id && !paymentTerms().length">Este proveedor no tiene condiciones cargadas. Cargalas en “Formas de pago”.</span>
+                <span *ngIf="form.supplier_id && paymentTerms().length">Aparece agrupada en la orden. Se gestionan en “Formas de pago”.</span>
+            </p>
+        </div>
+
         <!-- Imagenes -->
         <div>
             <label class="label mb-2 block">Fotos</label>

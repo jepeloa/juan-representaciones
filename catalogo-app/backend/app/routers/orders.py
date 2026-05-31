@@ -51,7 +51,9 @@ def _build_order_items(db: Session, items_in: list, condition: PaymentCondition 
     tot_usd = Decimal('0')
     for it in items_in:
         product = db.execute(
-            select(Product).options(selectinload(Product.supplier)).where(Product.id == it.product_id)
+            select(Product)
+            .options(selectinload(Product.supplier), selectinload(Product.payment_term))
+            .where(Product.id == it.product_id)
         ).scalar_one_or_none()
         if not product:
             raise HTTPException(status.HTTP_400_BAD_REQUEST, f'Producto id={it.product_id} no encontrado')
@@ -82,6 +84,7 @@ def _build_order_items(db: Session, items_in: list, condition: PaymentCondition 
             product_name=product.name,
             product_code=product.code,
             supplier_name=product.supplier.name if product.supplier else None,
+            payment_term=product.payment_term.text if product.payment_term else None,
         ))
     return out_items, _quantize(sub_ars), _quantize(tot_ars), _quantize(sub_usd), _quantize(tot_usd)
 

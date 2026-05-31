@@ -27,6 +27,8 @@ def _row_to_out(product: Product) -> ProductOut:
         supplier_name=product.supplier.name if product.supplier else '',
         category_id=product.category_id,
         category_name=product.category.name if product.category else None,
+        payment_term_id=product.payment_term_id,
+        payment_term=product.payment_term.text if product.payment_term else None,
         thumbnail=thumb,
     )
 
@@ -49,6 +51,7 @@ def list_products(
         selectinload(Product.supplier),
         selectinload(Product.category),
         selectinload(Product.images),
+        selectinload(Product.payment_term),
     )
     if supplier_id:
         stmt = stmt.where(Product.supplier_id == supplier_id)

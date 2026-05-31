@@ -31,6 +31,11 @@ export const routes: Routes = [
                 loadComponent: () => import('./pages/admin-conditions/admin-conditions.page').then(m => m.AdminConditionsPage),
             },
             {
+                path: 'admin/formas-pago',
+                canActivate: [adminGuard],
+                loadComponent: () => import('./pages/admin-payment-terms/admin-payment-terms.page').then(m => m.AdminPaymentTermsPage),
+            },
+            {
                 path: 'admin/productos',
                 canActivate: [adminGuard],
                 loadComponent: () => import('./pages/admin-products/admin-products.page').then(m => m.AdminProductsPage),

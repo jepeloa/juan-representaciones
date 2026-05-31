@@ -64,6 +64,7 @@ class OrderItemOut(BaseModel):
     product_name: str
     product_code: str | None
     supplier_name: str | None
+    payment_term: str | None = None
 
     class Config:
         from_attributes = True

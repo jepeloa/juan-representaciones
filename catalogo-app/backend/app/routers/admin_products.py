@@ -17,7 +17,7 @@ import io
 
 from app.auth.deps import require_admin
 from app.database import get_db
-from app.models import Product, ProductImage, Supplier, Category, User
+from app.models import Product, ProductImage, Supplier, Category, PaymentTerm, User
 from app.schemas import ProductWriteIn, ProductDetailOut, ProductImageOut
 from app.routers.products import _row_to_out
 
@@ -50,6 +50,25 @@ def _get_or_create_supplier(db: Session, supplier_id: int | None, supplier_name:
     db.add(sup)
     db.flush()
     return sup
+
+
+def _resolve_payment_term_id(db: Session, supplier_id: int, raw: str | None) -> int | None:
+    """Parsea el payment_term_id del form. '' / '0' / None => sin condición.
+
+    Valida que exista y que sea global (sin proveedor) o del mismo proveedor.
+    """
+    if raw in (None, '', '0'):
+        return None
+    try:
+        pid = int(raw)
+    except (TypeError, ValueError):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, f'Condición de pago inválida: {raw}')
+    term = db.get(PaymentTerm, pid)
+    if not term:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, f'Condición de pago id={pid} no existe')
+    if term.supplier_id is not None and term.supplier_id != supplier_id:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, 'La condición de pago pertenece a otro proveedor')
+    return term.id
 
 
 def _get_or_create_category(db: Session, supplier_id: int, category_id: int | None, category_name: str | None) -> Category | None:
@@ -118,12 +137,14 @@ async def create_product(
     unit_per_pack: int | None = Form(None),
     barcode: str | None = Form(None),
     notes: str | None = Form(None),
+    payment_term_id: str | None = Form(None),
     images: list[UploadFile] = File(default=[]),
     db: Session = Depends(get_db),
     _admin: User = Depends(require_admin),
 ):
     sup = _get_or_create_supplier(db, supplier_id, supplier_name)
     cat = _get_or_create_category(db, sup.id, category_id, category_name)
+    resolved_term_id = _resolve_payment_term_id(db, sup.id, payment_term_id)
     # Parse price
     parsed_price = None
     if price not in (None, ''):
@@ -143,6 +164,7 @@ async def create_product(
         unit_per_pack=unit_per_pack,
         barcode=(barcode.strip()[:60] if barcode else None),
         notes=(notes or None),
+        payment_term_id=resolved_term_id,
         source_file='manual',
     )
     db.add(product)
@@ -182,6 +204,7 @@ async def update_product(
     unit_per_pack: int | None = Form(None),
     barcode: str | None = Form(None),
     notes: str | None = Form(None),
+    payment_term_id: str | None = Form(None),
     images: list[UploadFile] = File(default=[]),
     clear_images: bool = Form(False),
     db: Session = Depends(get_db),
@@ -226,6 +249,8 @@ async def update_product(
         product.barcode = (barcode.strip()[:60]) or None
     if notes is not None:
         product.notes = notes or None
+    if payment_term_id is not None:
+        product.payment_term_id = _resolve_payment_term_id(db, product.supplier_id, payment_term_id)
 
     if clear_images:
         for im in list(product.images):

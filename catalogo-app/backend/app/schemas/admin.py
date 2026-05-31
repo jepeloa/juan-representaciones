@@ -44,3 +44,24 @@ class ProductWriteIn(BaseModel):
     unit_per_pack: int | None = None
     barcode: str | None = Field(default=None, max_length=60)
     notes: str | None = None
+    payment_term_id: int | None = None
+
+
+# ===== Payment terms (condición de pago en texto libre, por producto) =====
+class PaymentTermIn(BaseModel):
+    text: str = Field(min_length=1, max_length=500)
+    supplier_id: int | None = None
+    is_active: bool = True
+    sort_order: int = 0
+
+
+class PaymentTermOut(BaseModel):
+    id: int
+    text: str
+    supplier_id: int | None
+    supplier_name: str | None = None
+    is_active: bool
+    sort_order: int
+
+    class Config:
+        from_attributes = True

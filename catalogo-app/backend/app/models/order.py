@@ -60,5 +60,6 @@ class OrderItem(Base):
     product_name: Mapped[str] = mapped_column(String(500))
     product_code: Mapped[str | None] = mapped_column(String(120), nullable=True)
     supplier_name: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    payment_term: Mapped[str | None] = mapped_column(String(500), nullable=True)
 
     order: Mapped[Order] = relationship(back_populates='items')

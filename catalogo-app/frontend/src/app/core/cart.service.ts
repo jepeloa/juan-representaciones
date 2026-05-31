@@ -38,6 +38,7 @@ export interface OrderItem {
     product_name: string;
     product_code: string | null;
     supplier_name: string | null;
+    payment_term: string | null;
 }
 
 export interface Order {

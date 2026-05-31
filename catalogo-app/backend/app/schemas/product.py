@@ -43,6 +43,8 @@ class ProductOut(BaseModel):
     supplier_name: str
     category_id: int | None
     category_name: str | None
+    payment_term_id: int | None = None
+    payment_term: str | None = None  # texto de la condición de pago
     thumbnail: str | None
 
     class Config:

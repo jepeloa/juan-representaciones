@@ -158,13 +158,14 @@ def build_order_pdf(buf: BytesIO, *, order: Order, user: User, settings: dict[st
     story.append(info_table)
     story.append(Spacer(1, 6 * mm))
 
-    # ===== Items table — split by currency =====
+    # ===== Items — agrupados por condición de pago =====
     ars_items = [it for it in order.items if it.currency == 'ARS']
     usd_items = [it for it in order.items if it.currency == 'USD']
 
-    def items_block(items, currency):
-        if not items:
-            return None
+    term_style = ParagraphStyle('Term', parent=h2, textColor=COL_SAGE, fontSize=10, leading=14)
+
+    def items_block(items):
+        # Formatea cada fila según su propia moneda (un grupo puede mezclar ARS/USD)
         header = ['Producto', 'Cód.', 'Cant.', 'P. lista', 'P. final', 'Subtotal']
         rows = [header]
         for it in items:
@@ -175,9 +176,9 @@ def build_order_pdf(buf: BytesIO, *, order: Order, user: User, settings: dict[st
                 Paragraph(prod, body),
                 Paragraph(it.product_code or '', muted),
                 str(it.quantity),
-                _fmt_money(it.unit_price_list, currency),
-                _fmt_money(it.unit_price_final, currency),
-                _fmt_money(it.line_total, currency),
+                _fmt_money(it.unit_price_list, it.currency),
+                _fmt_money(it.unit_price_final, it.currency),
+                _fmt_money(it.line_total, it.currency),
             ])
         tbl = Table(rows, colWidths=[60 * mm, 22 * mm, 13 * mm, 26 * mm, 26 * mm, 26 * mm])
         tbl.setStyle(TableStyle([
@@ -197,13 +198,25 @@ def build_order_pdf(buf: BytesIO, *, order: Order, user: User, settings: dict[st
         ]))
         return tbl
 
-    if ars_items:
-        story.append(Paragraph(f"Productos en pesos (ARS) · {len(ars_items)} ítem(s)", h2))
-        story.append(items_block(ars_items, 'ARS'))
-        story.append(Spacer(1, 4 * mm))
-    if usd_items:
-        story.append(Paragraph(f"Productos en dólares (USD) · {len(usd_items)} ítem(s)", h2))
-        story.append(items_block(usd_items, 'USD'))
+    # Agrupar por condición de pago, preservando el orden de aparición
+    groups: list[tuple[str | None, list]] = []
+    index: dict[str | None, int] = {}
+    for it in order.items:
+        key = it.payment_term or None
+        if key not in index:
+            index[key] = len(groups)
+            groups.append((key, []))
+        groups[index[key]][1].append(it)
+
+    story.append(Paragraph(f"Productos · {len(order.items)} ítem(s)", h2))
+    story.append(Spacer(1, 1 * mm))
+    for term_text, items in groups:
+        if term_text:
+            story.append(Paragraph(f"Condición de pago: <b>{term_text}</b>", term_style))
+        else:
+            story.append(Paragraph("Sin condición de pago", term_style))
+        story.append(Spacer(1, 1 * mm))
+        story.append(items_block(items))
         story.append(Spacer(1, 4 * mm))
 
     # ===== Totals =====
