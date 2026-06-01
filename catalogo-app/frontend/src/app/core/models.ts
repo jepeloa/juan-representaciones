@@ -37,7 +37,7 @@ export interface Product {
     supplier_name: string;
     category_id: number | null;
     category_name: string | null;
-    payment_terms: { id: number; text: string }[];
+    payment_conditions: { id: number; name: string; description?: string | null }[];
     thumbnail: string | null;
 }
 

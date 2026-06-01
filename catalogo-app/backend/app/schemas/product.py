@@ -31,9 +31,10 @@ class ProductImageOut(BaseModel):
         from_attributes = True
 
 
-class PaymentTermBrief(BaseModel):
+class PaymentConditionBrief(BaseModel):
     id: int
-    text: str
+    name: str
+    description: str | None = None
 
     class Config:
         from_attributes = True
@@ -51,7 +52,7 @@ class ProductOut(BaseModel):
     supplier_name: str
     category_id: int | None
     category_name: str | None
-    payment_terms: list[PaymentTermBrief] = []  # formas de pago asociadas (N)
+    payment_conditions: list[PaymentConditionBrief] = []  # condiciones de pago asociadas (N)
     thumbnail: str | None
 
     class Config:

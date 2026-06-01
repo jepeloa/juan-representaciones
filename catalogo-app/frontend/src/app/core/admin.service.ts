@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { API_BASE } from './api';
@@ -42,7 +42,7 @@ export interface ProductFormData {
     unit_per_pack?: number | null;
     barcode?: string | null;
     notes?: string | null;
-    payment_term_ids?: number[];
+    payment_condition_ids?: number[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -67,8 +67,8 @@ export class AdminService {
     private toFormData(body: ProductFormData, files: File[] = [], extra: Record<string, string> = {}): FormData {
         const fd = new FormData();
         Object.entries(body).forEach(([k, v]) => {
-            // payment_term_ids se envía siempre como CSV (incluso vacío) para poder limpiar
-            if (k === 'payment_term_ids') {
+            // payment_condition_ids se envía siempre como CSV (incluso vacío) para poder limpiar
+            if (k === 'payment_condition_ids') {
                 fd.append(k, Array.isArray(v) ? v.join(',') : '');
                 return;
             }
@@ -102,23 +102,6 @@ export class AdminService {
     }
     deleteCondition(id: number): Observable<void> {
         return this.http.delete<void>(`${API_BASE}/admin/payment-conditions/${id}`);
-    }
-
-    // ===== Payment terms (condición de pago por producto, texto libre) =====
-    listPaymentTerms(supplierId?: number | null, onlyActive = false): Observable<AdminPaymentTerm[]> {
-        let params = new HttpParams();
-        if (supplierId !== null && supplierId !== undefined) params = params.set('supplier_id', supplierId);
-        if (onlyActive) params = params.set('only_active', 'true');
-        return this.http.get<AdminPaymentTerm[]>(`${API_BASE}/admin/payment-terms`, { params });
-    }
-    createPaymentTerm(body: PaymentTermBody): Observable<AdminPaymentTerm> {
-        return this.http.post<AdminPaymentTerm>(`${API_BASE}/admin/payment-terms`, body);
-    }
-    updatePaymentTerm(id: number, body: PaymentTermBody): Observable<AdminPaymentTerm> {
-        return this.http.patch<AdminPaymentTerm>(`${API_BASE}/admin/payment-terms/${id}`, body);
-    }
-    deletePaymentTerm(id: number): Observable<void> {
-        return this.http.delete<void>(`${API_BASE}/admin/payment-terms/${id}`);
     }
 
     // ===== Settings =====
@@ -157,18 +140,3 @@ export interface AdminSettings {
     order_notification_email: string | null;
 }
 
-export interface AdminPaymentTerm {
-    id: number;
-    text: string;
-    supplier_id: number | null;
-    supplier_name: string | null;
-    is_active: boolean;
-    sort_order: number;
-}
-
-export interface PaymentTermBody {
-    text: string;
-    supplier_id: number | null;
-    is_active: boolean;
-    sort_order: number;
-}

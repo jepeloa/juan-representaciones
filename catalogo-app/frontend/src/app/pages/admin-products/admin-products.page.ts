@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { debounceTime, Subject } from 'rxjs';
 
-import { AdminService, ProductFormData, AdminPaymentTerm } from '../../core/admin.service';
+import { AdminService, ProductFormData, AdminPaymentCondition } from '../../core/admin.service';
 import { CatalogService } from '../../core/catalog.service';
 import { Category, Product, Supplier } from '../../core/models';
 
@@ -16,7 +16,7 @@ import { Category, Product, Supplier } from '../../core/models';
 export class AdminProductsPage implements OnInit {
     suppliers = signal<Supplier[]>([]);
     categories = signal<Category[]>([]);
-    paymentTerms = signal<AdminPaymentTerm[]>([]);
+    conditions = signal<AdminPaymentCondition[]>([]);
     products = signal<Product[]>([]);
     total = signal(0);
     page = 1;
@@ -52,6 +52,7 @@ export class AdminProductsPage implements OnInit {
 
     ngOnInit() {
         this.catalog.suppliers().subscribe(s => this.suppliers.set(s));
+        this.admin.listConditions().subscribe(c => this.conditions.set(c));
         this.refresh();
     }
 
@@ -105,22 +106,17 @@ export class AdminProductsPage implements OnInit {
             unit_per_pack: null,
             barcode: null,
             notes: null,
-            payment_term_ids: [],
+            payment_condition_ids: [],
         };
     }
 
-    loadPaymentTerms(supplierId: number | null) {
-        if (!supplierId) { this.paymentTerms.set([]); return; }
-        this.admin.listPaymentTerms(supplierId, true).subscribe(t => this.paymentTerms.set(t));
+    isCondSelected(id: number): boolean {
+        return (this.form.payment_condition_ids ?? []).includes(id);
     }
 
-    isTermSelected(id: number): boolean {
-        return (this.form.payment_term_ids ?? []).includes(id);
-    }
-
-    togglePaymentTerm(id: number) {
-        const cur = this.form.payment_term_ids ?? [];
-        this.form.payment_term_ids = cur.includes(id) ? cur.filter(x => x !== id) : [...cur, id];
+    toggleCondition(id: number) {
+        const cur = this.form.payment_condition_ids ?? [];
+        this.form.payment_condition_ids = cur.includes(id) ? cur.filter(x => x !== id) : [...cur, id];
     }
 
     openNew() {
@@ -132,7 +128,6 @@ export class AdminProductsPage implements OnInit {
         this.newCategoryName = '';
         this.clearExistingImages = false;
         this.existingThumbnail = null;
-        this.paymentTerms.set([]);
         this.clearFiles();
         this.showForm.set(true);
         this.error.set(null);
@@ -153,7 +148,7 @@ export class AdminProductsPage implements OnInit {
             price: p.price !== null && p.price !== undefined ? String(p.price) : null,
             currency: p.currency,
             iva: p.iva,
-            payment_term_ids: (p.payment_terms ?? []).map(t => t.id),
+            payment_condition_ids: (p.payment_conditions ?? []).map(c => c.id),
         };
         this.useNewSupplier = false;
         this.useNewCategory = false;
@@ -165,7 +160,6 @@ export class AdminProductsPage implements OnInit {
         if (p.supplier_id) {
             this.catalog.categories(p.supplier_id).subscribe(c => this.categories.set(c));
         }
-        this.loadPaymentTerms(p.supplier_id);
         this.showForm.set(true);
         this.error.set(null);
         this.successMsg.set(null);
@@ -174,7 +168,6 @@ export class AdminProductsPage implements OnInit {
 
     onSupplierSelect() {
         this.form.category_id = null;
-        this.form.payment_term_ids = [];
         this.newCategoryName = '';
         this.useNewCategory = false;
         if (this.form.supplier_id) {
@@ -182,7 +175,6 @@ export class AdminProductsPage implements OnInit {
         } else {
             this.categories.set([]);
         }
-        this.loadPaymentTerms(this.form.supplier_id ?? null);
     }
 
     isDragging = signal(false);

@@ -170,7 +170,7 @@ def build_order_pdf(buf: BytesIO, *, order: Order, user: User, settings: dict[st
             if it.supplier_name:
                 prod += f"<br/><font color='#6e8478' size='7'>{it.supplier_name}</font>"
             if it.payment_term:
-                prod += f"<br/><font color='#557390' size='7'>Formas de pago: {it.payment_term}</font>"
+                prod += f"<br/><font color='#557390' size='7'>Condiciones de pago: {it.payment_term}</font>"
             rows.append([
                 Paragraph(prod, body),
                 Paragraph(it.product_code or '', muted),

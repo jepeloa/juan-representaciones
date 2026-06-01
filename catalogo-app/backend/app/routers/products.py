@@ -8,7 +8,7 @@ from app.database import get_db
 from app.models import Product, Supplier, Category, ProductImage, User
 from app.schemas import (
     ProductOut, ProductDetailOut, ProductListOut, FacetsOut, SupplierOut, ProductImageOut,
-    PaymentTermBrief,
+    PaymentConditionBrief,
 )
 
 router = APIRouter(prefix='/api/products', tags=['products'])
@@ -28,7 +28,10 @@ def _row_to_out(product: Product) -> ProductOut:
         supplier_name=product.supplier.name if product.supplier else '',
         category_id=product.category_id,
         category_name=product.category.name if product.category else None,
-        payment_terms=[PaymentTermBrief(id=t.id, text=t.text) for t in product.payment_terms],
+        payment_conditions=[
+            PaymentConditionBrief(id=c.id, name=c.name, description=c.description)
+            for c in product.payment_conditions
+        ],
         thumbnail=thumb,
     )
 
@@ -51,7 +54,7 @@ def list_products(
         selectinload(Product.supplier),
         selectinload(Product.category),
         selectinload(Product.images),
-        selectinload(Product.payment_terms),
+        selectinload(Product.payment_conditions),
     )
     if supplier_id:
         stmt = stmt.where(Product.supplier_id == supplier_id)

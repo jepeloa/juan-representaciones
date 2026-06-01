@@ -5,12 +5,12 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database import Base
 
 
-# Asociación N-a-N: un producto puede tener varias condiciones de pago (forma de pago)
-product_payment_terms = Table(
-    'product_payment_terms',
+# Asociación N-a-N: un producto puede tener varias condiciones de pago
+product_payment_conditions = Table(
+    'product_payment_conditions',
     Base.metadata,
     Column('product_id', ForeignKey('products.id', ondelete='CASCADE'), primary_key=True),
-    Column('payment_term_id', ForeignKey('payment_terms.id', ondelete='CASCADE'), primary_key=True),
+    Column('payment_condition_id', ForeignKey('payment_conditions.id', ondelete='CASCADE'), primary_key=True),
 )
 
 
@@ -39,8 +39,8 @@ class Product(Base):
 
     supplier: Mapped['Supplier'] = relationship(back_populates='products')  # noqa: F821
     category: Mapped['Category | None'] = relationship(back_populates='products')  # noqa: F821
-    payment_terms: Mapped[list['PaymentTerm']] = relationship(  # noqa: F821
-        secondary=product_payment_terms, lazy='selectin', order_by='PaymentTerm.sort_order',
+    payment_conditions: Mapped[list['PaymentCondition']] = relationship(  # noqa: F821
+        secondary=product_payment_conditions, lazy='selectin', order_by='PaymentCondition.sort_order',
     )
     images: Mapped[list['ProductImage']] = relationship(
         back_populates='product', cascade='all, delete-orphan', order_by='ProductImage.position'

@@ -1,11 +1,10 @@
 from app.schemas.auth import LoginIn, TokenOut, UserOut
 from app.schemas.product import (
-    ProductOut, ProductDetailOut, ProductImageOut, PaymentTermBrief,
+    ProductOut, ProductDetailOut, ProductImageOut, PaymentConditionBrief,
     SupplierOut, CategoryOut, ProductListOut, FacetsOut,
 )
 from app.schemas.admin import (
     UserCreateIn, UserUpdateIn, UserAdminOut, ProductWriteIn,
-    PaymentTermIn, PaymentTermOut,
 )
 from app.schemas.orders import (
     PaymentConditionIn, PaymentConditionOut,
@@ -15,10 +14,9 @@ from app.schemas.orders import (
 
 __all__ = [
     'LoginIn', 'TokenOut', 'UserOut',
-    'ProductOut', 'ProductDetailOut', 'ProductImageOut', 'PaymentTermBrief',
+    'ProductOut', 'ProductDetailOut', 'ProductImageOut', 'PaymentConditionBrief',
     'SupplierOut', 'CategoryOut', 'ProductListOut', 'FacetsOut',
     'UserCreateIn', 'UserUpdateIn', 'UserAdminOut', 'ProductWriteIn',
-    'PaymentTermIn', 'PaymentTermOut',
     'PaymentConditionIn', 'PaymentConditionOut',
     'SettingIn', 'SettingsBulkIn', 'SettingsOut',
     'OrderItemIn', 'OrderItemOut', 'OrderCreateIn', 'OrderOut',

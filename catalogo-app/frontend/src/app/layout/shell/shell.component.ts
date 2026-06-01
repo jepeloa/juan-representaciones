@@ -57,12 +57,6 @@ export class ShellComponent {
             adminOnly: true,
         },
         {
-            label: 'Forma de pago',
-            route: '/admin/formas-pago',
-            icon: 'M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3M3.75 5.25h16.5c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125H3.75c-.621 0-1.125-.504-1.125-1.125V6.375c0-.621.504-1.125 1.125-1.125Z',
-            adminOnly: true,
-        },
-        {
             label: 'Usuarios',
             route: '/admin/usuarios',
             icon: 'M15 8a3 3 0 1 0-6 0 3 3 0 0 0 6 0Zm6 0a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm-3 5a5 5 0 0 0-5 5v1h10v-1a5 5 0 0 0-5-5Zm-9 6v-1a5 5 0 0 1 5-5h0a4.99 4.99 0 0 0-2 4v2H9Z',

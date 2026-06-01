@@ -43,7 +43,7 @@ def _render_html_body(order: Order, user: User, company: str) -> str:
         if it.supplier_name:
             meta += f"<br><small style='color:#6e8478'>{it.supplier_name}</small>"
         if it.payment_term:
-            meta += f"<br><small style='color:#557390'>Formas de pago: {it.payment_term}</small>"
+            meta += f"<br><small style='color:#557390'>Condiciones de pago: {it.payment_term}</small>"
         rows.append(
             f"<tr>"
             f"<td style='padding:8px;border-bottom:1px solid #efe8d3;color:#384c60'>{it.product_name}{meta}</td>"

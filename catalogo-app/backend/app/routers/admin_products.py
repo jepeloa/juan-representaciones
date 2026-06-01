@@ -17,7 +17,7 @@ import io
 
 from app.auth.deps import require_admin
 from app.database import get_db
-from app.models import Product, ProductImage, Supplier, Category, PaymentTerm, User
+from app.models import Product, ProductImage, Supplier, Category, PaymentCondition, User
 from app.schemas import ProductWriteIn, ProductDetailOut, ProductImageOut
 from app.routers.products import _row_to_out
 
@@ -52,12 +52,12 @@ def _get_or_create_supplier(db: Session, supplier_id: int | None, supplier_name:
     return sup
 
 
-def _resolve_payment_terms(db: Session, supplier_id: int, raw: str | None) -> list[PaymentTerm] | None:
+def _resolve_payment_conditions(db: Session, raw: str | None) -> list[PaymentCondition] | None:
     """Parsea el CSV de ids de condiciones del form.
 
     None  => el campo no vino (no cambiar).
     ''    => limpiar (sin condiciones).
-    Valida que cada una exista y sea global o del mismo proveedor.
+    Valida que cada condición exista.
     """
     if raw is None:
         return None
@@ -69,15 +69,13 @@ def _resolve_payment_terms(db: Session, supplier_id: int, raw: str | None) -> li
         if not chunk.lstrip('-').isdigit():
             raise HTTPException(status.HTTP_400_BAD_REQUEST, f'Condición de pago inválida: {chunk}')
         ids.append(int(chunk))
-    terms: list[PaymentTerm] = []
+    conds: list[PaymentCondition] = []
     for pid in dict.fromkeys(ids):  # únicos, preservando orden
-        term = db.get(PaymentTerm, pid)
-        if not term:
+        c = db.get(PaymentCondition, pid)
+        if not c:
             raise HTTPException(status.HTTP_400_BAD_REQUEST, f'Condición de pago id={pid} no existe')
-        if term.supplier_id is not None and term.supplier_id != supplier_id:
-            raise HTTPException(status.HTTP_400_BAD_REQUEST, 'Una condición de pago pertenece a otro proveedor')
-        terms.append(term)
-    return terms
+        conds.append(c)
+    return conds
 
 
 def _get_or_create_category(db: Session, supplier_id: int, category_id: int | None, category_name: str | None) -> Category | None:
@@ -146,14 +144,14 @@ async def create_product(
     unit_per_pack: int | None = Form(None),
     barcode: str | None = Form(None),
     notes: str | None = Form(None),
-    payment_term_ids: str | None = Form(None),
+    payment_condition_ids: str | None = Form(None),
     images: list[UploadFile] = File(default=[]),
     db: Session = Depends(get_db),
     _admin: User = Depends(require_admin),
 ):
     sup = _get_or_create_supplier(db, supplier_id, supplier_name)
     cat = _get_or_create_category(db, sup.id, category_id, category_name)
-    terms = _resolve_payment_terms(db, sup.id, payment_term_ids) or []
+    conds = _resolve_payment_conditions(db, payment_condition_ids) or []
     # Parse price
     parsed_price = None
     if price not in (None, ''):
@@ -177,7 +175,7 @@ async def create_product(
     )
     db.add(product)
     db.flush()
-    product.payment_terms = terms
+    product.payment_conditions = conds
     # Attach images
     for pos, upload in enumerate(images or []):
         if not upload or not upload.filename:
@@ -213,7 +211,7 @@ async def update_product(
     unit_per_pack: int | None = Form(None),
     barcode: str | None = Form(None),
     notes: str | None = Form(None),
-    payment_term_ids: str | None = Form(None),
+    payment_condition_ids: str | None = Form(None),
     images: list[UploadFile] = File(default=[]),
     clear_images: bool = Form(False),
     db: Session = Depends(get_db),
@@ -258,8 +256,8 @@ async def update_product(
         product.barcode = (barcode.strip()[:60]) or None
     if notes is not None:
         product.notes = notes or None
-    if payment_term_ids is not None:
-        product.payment_terms = _resolve_payment_terms(db, product.supplier_id, payment_term_ids) or []
+    if payment_condition_ids is not None:
+        product.payment_conditions = _resolve_payment_conditions(db, payment_condition_ids) or []
 
     if clear_images:
         for im in list(product.images):

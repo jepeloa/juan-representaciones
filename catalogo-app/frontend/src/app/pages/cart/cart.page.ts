@@ -33,7 +33,7 @@ export class CartPage implements OnInit {
     });
 
     termsLabel(p: Product): string {
-        return (p.payment_terms ?? []).map(t => t.text).join(', ');
+        return (p.payment_conditions ?? []).map(c => c.name).join(', ');
     }
 
     subtotalsByCurrency = computed(() => {

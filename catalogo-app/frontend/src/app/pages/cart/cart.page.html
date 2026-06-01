@@ -62,7 +62,7 @@
                         </p>
                         <h3 class="font-semibold text-sm sm:text-base text-slate-800 line-clamp-2" [title]="it.product.name">{{ it.product.name }}</h3>
                         <p *ngIf="it.product.code" class="text-[11px] font-mono text-slate-500 truncate">{{ it.product.code }}</p>
-                        <p *ngIf="termsLabel(it.product)" class="text-[11px] text-brand-700 mt-0.5">Formas de pago: {{ termsLabel(it.product) }}</p>
+                        <p *ngIf="termsLabel(it.product)" class="text-[11px] text-brand-700 mt-0.5">Condiciones de pago: {{ termsLabel(it.product) }}</p>
                     </div>
                     <button class="text-slate-400 hover:text-blush-500 p-1 -mr-1 -mt-1" (click)="cart.remove(it.product.id)" aria-label="Quitar">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">

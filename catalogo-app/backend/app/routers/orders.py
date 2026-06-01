@@ -52,7 +52,7 @@ def _build_order_items(db: Session, items_in: list, condition: PaymentCondition 
     for it in items_in:
         product = db.execute(
             select(Product)
-            .options(selectinload(Product.supplier), selectinload(Product.payment_terms))
+            .options(selectinload(Product.supplier), selectinload(Product.payment_conditions))
             .where(Product.id == it.product_id)
         ).scalar_one_or_none()
         if not product:
@@ -84,7 +84,7 @@ def _build_order_items(db: Session, items_in: list, condition: PaymentCondition 
             product_name=product.name,
             product_code=product.code,
             supplier_name=product.supplier.name if product.supplier else None,
-            payment_term=', '.join(t.text for t in product.payment_terms) or None,
+            payment_term=', '.join(c.name for c in product.payment_conditions) or None,
         ))
     return out_items, _quantize(sub_ars), _quantize(tot_ars), _quantize(sub_usd), _quantize(tot_usd)
 
