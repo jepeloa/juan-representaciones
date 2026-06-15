@@ -9,6 +9,7 @@ export interface ProductQuery {
     q?: string;
     supplier_id?: number;
     category_id?: number;
+    category_name?: string;
     currency?: string;
     max_price?: number;
     min_price?: number;

@@ -32,7 +32,7 @@ export class CatalogPage implements OnInit {
 
     q = '';
     supplierId: number | null = null;
-    categoryId: number | null = null;
+    categoryName: string | null = null;
     currency = '';
     maxPrice: number | null = null;
     sort = 'name';
@@ -71,7 +71,7 @@ export class CatalogPage implements OnInit {
         const qp = this.route.snapshot.queryParamMap;
         this.q = qp.get('q') ?? '';
         this.supplierId = qp.get('supplier') ? Number(qp.get('supplier')) : null;
-        this.categoryId = qp.get('cat') ? Number(qp.get('cat')) : null;
+        this.categoryName = qp.get('cat') || null;
         this.currency = qp.get('mon') ?? '';
         // Everyone defaults to grid; admins can switch to table (persisted via ?view=)
         this.view.set(this.isAdmin ? ((qp.get('view') as ViewMode) || 'grid') : 'grid');
@@ -116,7 +116,7 @@ export class CatalogPage implements OnInit {
         const query: ProductQuery = {
             q: this.q || undefined,
             supplier_id: this.supplierId ?? undefined,
-            category_id: this.categoryId ?? undefined,
+            category_name: this.categoryName ?? undefined,
             currency: this.currency || undefined,
             max_price: this.maxPrice ?? undefined,
             sort: this.sort,
@@ -140,7 +140,7 @@ export class CatalogPage implements OnInit {
     }
 
     onSupplierChange() {
-        this.categoryId = null;
+        this.categoryName = null;
         this.page = 1;
         if (this.supplierId) this.loadCategories(this.supplierId);
         else this.svc.categories().subscribe(c => this.categories.set(c));
@@ -190,7 +190,7 @@ export class CatalogPage implements OnInit {
     reset() {
         this.q = '';
         this.supplierId = null;
-        this.categoryId = null;
+        this.categoryName = null;
         this.currency = '';
         this.maxPrice = null;
         this.priceSlider = 100;
@@ -240,7 +240,7 @@ export class CatalogPage implements OnInit {
         const qp: any = {};
         if (this.q) qp.q = this.q;
         if (this.supplierId) qp.supplier = this.supplierId;
-        if (this.categoryId) qp.cat = this.categoryId;
+        if (this.categoryName) qp.cat = this.categoryName;
         if (this.currency) qp.mon = this.currency;
         if (this.view() !== 'grid') qp.view = this.view();
         if (this.page > 1) qp.page = this.page;

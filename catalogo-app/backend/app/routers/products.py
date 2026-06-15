@@ -44,6 +44,7 @@ def list_products(
     q: str | None = Query(None, description='Búsqueda por palabras en nombre/código/descripción/categoría, con ranking de relevancia'),
     supplier_id: int | None = None,
     category_id: int | None = None,
+    category_name: str | None = Query(None, description='Filtra por nombre de categoría (todas las marcas que la tengan)'),
     currency: str | None = None,
     max_price: Decimal | None = None,
     min_price: Decimal | None = None,
@@ -75,10 +76,16 @@ def list_products(
     key = sort.lstrip('-')
     desc = sort.startswith('-')
 
-    # Joins para filtrar/ordenar (evitando duplicar el join a Category)
-    joined_category = False
+    # Joins para filtrar/ordenar (un único join a Category sin importar cuántas
+    # cosas lo necesiten: búsqueda, orden por categoría o filtro por nombre).
     if key == 'supplier':
         stmt = stmt.join(Supplier, isouter=True)
+    need_category_join = bool(q) or key == 'category' or bool(category_name)
+    if need_category_join:
+        stmt = stmt.join(Category, isouter=True)
+    if category_name:
+        # Filtra por nombre de categoría → trae productos de todas las marcas.
+        stmt = stmt.where(Category.name == category_name)
 
     # Búsqueda: cada palabra debe aparecer (AND) en nombre/código/descripción/categoría,
     # con ranking de relevancia: nombre > categoría > código > descripción.
@@ -86,8 +93,6 @@ def list_products(
     if q:
         raw = q.strip()
         tokens = [t for t in raw.split() if t] or [raw]
-        stmt = stmt.join(Category, isouter=True)
-        joined_category = True
         for t in tokens:
             tp = f'%{t}%'
             stmt = stmt.where(or_(
@@ -107,9 +112,6 @@ def list_products(
             (Product.code.ilike(full), 2),       # matchea por código
             else_=1,                             # matcheó solo por descripción
         )
-
-    if key == 'category' and not joined_category:
-        stmt = stmt.join(Category, isouter=True)
 
     # Orden: por relevancia cuando hay búsqueda y el sort es el default ('name')
     # o explícito ('relevance'); en otro caso, por la columna pedida.

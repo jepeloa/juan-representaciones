@@ -16,15 +16,21 @@ def list_categories(
     db: Session = Depends(get_db),
     _: User = Depends(get_current_user),
 ):
+    # Deduplicado por NOMBRE: la misma categoría existe por proveedor, pero en el
+    # filtro debe aparecer una sola vez y traer productos de todas las marcas.
     q = (
-        select(Category, func.count(Product.id).label('cnt'))
+        select(
+            Category.name.label('name'),
+            func.count(Product.id).label('cnt'),
+            func.min(Category.id).label('id'),
+        )
         .join(Product, Product.category_id == Category.id, isouter=True)
-        .group_by(Category.id)
+        .group_by(Category.name)
         .order_by(Category.name)
     )
     if supplier_id:
         q = q.where(Category.supplier_id == supplier_id)
     return [
-        CategoryOut(id=c.id, name=c.name, supplier_id=c.supplier_id, product_count=cnt)
-        for c, cnt in db.execute(q).all()
+        CategoryOut(id=row.id, name=row.name, supplier_id=supplier_id or 0, product_count=row.cnt)
+        for row in db.execute(q).all()
     ]

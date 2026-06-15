@@ -56,9 +56,9 @@
 
         <div class="md:col-span-3">
             <label class="label mb-1 block">Categoría</label>
-            <select class="input" [(ngModel)]="categoryId" (ngModelChange)="onCategoryChange()" [disabled]="!categories().length">
+            <select class="input" [(ngModel)]="categoryName" (ngModelChange)="onCategoryChange()" [disabled]="!categories().length">
                 <option [ngValue]="null">Todas</option>
-                <option *ngFor="let c of categories()" [ngValue]="c.id">{{ c.name }}</option>
+                <option *ngFor="let c of categories()" [ngValue]="c.name">{{ c.name }} ({{ c.product_count }})</option>
             </select>
         </div>
 
