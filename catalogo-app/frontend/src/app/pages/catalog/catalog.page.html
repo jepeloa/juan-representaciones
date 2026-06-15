@@ -225,7 +225,7 @@
     </div>
 
     <!-- GRID VIEW -->
-    <div *ngIf="view() === 'grid'" class="grid gap-3 md:gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+    <div *ngIf="view() === 'grid'" class="grid gap-4 md:gap-5 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         <div *ngFor="let p of products()" class="card overflow-hidden flex flex-col cursor-pointer hover:shadow-lift transition" (click)="openDetail(p)">
             <div class="aspect-square bg-cream-100 flex items-center justify-center overflow-hidden">
                 <img *ngIf="p.thumbnail; else noimgcard" [src]="p.thumbnail" loading="lazy" class="w-full h-full object-cover" alt=""/>
