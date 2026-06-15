@@ -66,7 +66,9 @@
     <div class="flex-1 flex flex-col overflow-hidden">
         <!-- Top bar -->
         <header class="bg-white border-b border-cream-200 shrink-0 shadow-soft z-10">
-          <div class="flex items-center gap-3 px-3 md:px-6 h-14 md:h-16" [class.md:h-24]="!isAdmin">
+          <div class="flex items-center gap-3 px-3 md:px-6"
+               [class.h-14]="isAdmin" [class.md:h-16]="isAdmin"
+               [class.h-16]="!isAdmin" [class.md:h-24]="!isAdmin">
             <button *ngIf="isAdmin" class="md:hidden p-2 -ml-1 rounded hover:bg-cream-100"
                     (click)="toggleMobile()" aria-label="Abrir menú">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
@@ -76,8 +78,9 @@
 
             <!-- Logo: en mobile siempre; en desktop también para el cliente. Más grande para el cliente. -->
             <div class="flex items-center shrink-0" [class.md:hidden]="isAdmin">
-                <img src="logo.png" alt="JMG" class="object-contain h-10"
-                     [class.md:h-16]="!isAdmin"/>
+                <img src="logo.png" alt="JMG" class="object-contain"
+                     [class.h-10]="isAdmin"
+                     [class.h-14]="!isAdmin" [class.md:h-20]="!isAdmin"/>
             </div>
 
             <h1 *ngIf="isAdmin" class="hidden md:block font-display text-base md:text-lg font-bold text-brand-900">Categoría</h1>
