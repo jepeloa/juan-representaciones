@@ -7,6 +7,7 @@ import { debounceTime, Subject } from 'rxjs';
 import { CatalogService, ProductQuery } from '../../core/catalog.service';
 import { CartService } from '../../core/cart.service';
 import { AuthService } from '../../core/auth.service';
+import { SearchService } from '../../core/search.service';
 import { Category, Facets, Product, ProductDetail, Supplier } from '../../core/models';
 import { ProductDetailModalComponent } from './product-detail-modal.component';
 
@@ -30,7 +31,6 @@ export class CatalogPage implements OnInit {
     offerPreview = signal<Product[]>([]);
     showOffersPopup = signal(false);
 
-    q = '';
     supplierId: number | null = null;
     categoryName: string | null = null;
     currency = '';
@@ -47,14 +47,24 @@ export class CatalogPage implements OnInit {
 
     private search$ = new Subject<void>();
 
+    private firstQueryEffect = true;
+
     constructor(
         private svc: CatalogService,
         public cart: CartService,
         public auth: AuthService,
+        public search: SearchService,
         private route: ActivatedRoute,
         private router: Router,
     ) {
         this.search$.pipe(debounceTime(300)).subscribe(() => this.fetch());
+        // El texto de búsqueda es global (shell + página): al cambiar, recargar.
+        effect(() => {
+            this.search.query();
+            if (this.firstQueryEffect) { this.firstQueryEffect = false; return; }
+            this.page = 1;
+            this.search$.next();
+        });
     }
 
     get isAdmin(): boolean {
@@ -69,7 +79,7 @@ export class CatalogPage implements OnInit {
 
     ngOnInit() {
         const qp = this.route.snapshot.queryParamMap;
-        this.q = qp.get('q') ?? '';
+        this.search.query.set(qp.get('q') ?? '');
         this.supplierId = qp.get('supplier') ? Number(qp.get('supplier')) : null;
         this.categoryName = qp.get('cat') || null;
         this.currency = qp.get('mon') ?? '';
@@ -114,7 +124,7 @@ export class CatalogPage implements OnInit {
     fetch() {
         this.loading.set(true);
         const query: ProductQuery = {
-            q: this.q || undefined,
+            q: this.search.query() || undefined,
             supplier_id: this.supplierId ?? undefined,
             category_name: this.categoryName ?? undefined,
             currency: this.currency || undefined,
@@ -188,7 +198,7 @@ export class CatalogPage implements OnInit {
     prevPage() { if (this.page > 1) { this.page--; this.fetch(); window.scrollTo({top: 0, behavior: 'smooth'}); } }
 
     reset() {
-        this.q = '';
+        this.search.query.set('');
         this.supplierId = null;
         this.categoryName = null;
         this.currency = '';
@@ -238,7 +248,7 @@ export class CatalogPage implements OnInit {
 
     private syncUrl() {
         const qp: any = {};
-        if (this.q) qp.q = this.q;
+        if (this.search.query()) qp.q = this.search.query();
         if (this.supplierId) qp.supplier = this.supplierId;
         if (this.categoryName) qp.cat = this.categoryName;
         if (this.currency) qp.mon = this.currency;

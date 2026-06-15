@@ -65,7 +65,8 @@
     <!-- Main column -->
     <div class="flex-1 flex flex-col overflow-hidden">
         <!-- Top bar -->
-        <header class="flex items-center gap-2 bg-white border-b border-cream-200 px-3 md:px-6 h-14 md:h-16 shrink-0 shadow-soft z-10">
+        <header class="bg-white border-b border-cream-200 shrink-0 shadow-soft z-10">
+          <div class="flex items-center gap-3 px-3 md:px-6 h-14 md:h-16" [class.md:h-24]="!isAdmin">
             <button *ngIf="isAdmin" class="md:hidden p-2 -ml-1 rounded hover:bg-cream-100"
                     (click)="toggleMobile()" aria-label="Abrir menú">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
@@ -73,32 +74,25 @@
                 </svg>
             </button>
 
-            <!-- Logo: en mobile siempre; en desktop también para el cliente (no tiene sidebar) -->
-            <div class="flex items-center gap-2" [class.md:hidden]="isAdmin">
-                <img src="logo.png" alt="JMG" class="h-9 object-contain"/>
+            <!-- Logo: en mobile siempre; en desktop también para el cliente. Más grande para el cliente. -->
+            <div class="flex items-center shrink-0" [class.md:hidden]="isAdmin">
+                <img src="logo.png" alt="JMG" class="object-contain h-10"
+                     [class.md:h-16]="!isAdmin"/>
             </div>
 
             <h1 *ngIf="isAdmin" class="hidden md:block font-display text-base md:text-lg font-bold text-brand-900">Categoría</h1>
 
-            <!-- Botonera de navegación (cliente): reemplaza al sidebar -->
-            <nav *ngIf="!isAdmin" class="flex-1 flex items-center gap-1 overflow-x-auto px-1 md:px-3 no-scrollbar">
-                <a *ngFor="let item of nav()"
-                   [routerLink]="item.route"
-                   routerLinkActive="bg-brand-50 text-brand-700 font-semibold"
-                   [routerLinkActiveOptions]="{exact: false}"
-                   class="group flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-cream-100 hover:text-slate-800 transition whitespace-nowrap">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 shrink-0">
-                        <path [attr.d]="item.icon"/>
-                    </svg>
-                    <span class="hidden sm:inline">{{ item.label }}</span>
-                    <span *ngIf="item.showBadge && cart.count() > 0"
-                          class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-brand-500 text-white text-xs font-bold">
-                        {{ cart.count() }}
-                    </span>
-                </a>
-            </nav>
+            <!-- Buscador global arriba (cliente) -->
+            <div *ngIf="!isAdmin" class="relative flex-1 max-w-2xl mx-auto">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke="currentColor" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
+                </svg>
+                <input type="text" class="input pl-11 h-11 md:h-12 text-base rounded-full"
+                       placeholder="Buscar producto, código…"
+                       [ngModel]="search.query()" (ngModelChange)="onSearch($event)"/>
+            </div>
 
-            <div class="flex-1" [class.hidden]="!isAdmin"></div>
+            <div class="flex-1" *ngIf="isAdmin"></div>
 
             <!-- Cart shortcut (mobile, solo admin: el cliente tiene "Mi orden" en la botonera) -->
             <a *ngIf="isAdmin" routerLink="/carrito"
@@ -136,6 +130,25 @@
                     </button>
                 </div>
             </div>
+          </div>
+
+          <!-- Fila 2: botonera de navegación (cliente), debajo del buscador -->
+          <nav *ngIf="!isAdmin" class="flex items-center justify-center gap-1 px-3 md:px-6 pb-2 -mt-1 overflow-x-auto">
+              <a *ngFor="let item of nav()"
+                 [routerLink]="item.route"
+                 routerLinkActive="bg-brand-50 text-brand-700 font-semibold"
+                 [routerLinkActiveOptions]="{exact: false}"
+                 class="group flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-cream-100 hover:text-slate-800 transition whitespace-nowrap">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 shrink-0">
+                      <path [attr.d]="item.icon"/>
+                  </svg>
+                  <span>{{ item.label }}</span>
+                  <span *ngIf="item.showBadge && cart.count() > 0"
+                        class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-brand-500 text-white text-xs font-bold">
+                      {{ cart.count() }}
+                  </span>
+              </a>
+          </nav>
         </header>
 
         <!-- Content -->

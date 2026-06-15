@@ -3,8 +3,11 @@ import { CommonModule } from '@angular/common';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 
+import { FormsModule } from '@angular/forms';
+
 import { AuthService } from '../../core/auth.service';
 import { CartService } from '../../core/cart.service';
+import { SearchService } from '../../core/search.service';
 
 interface NavItem {
     label: string;
@@ -17,7 +20,7 @@ interface NavItem {
 @Component({
     selector: 'app-shell',
     standalone: true,
-    imports: [CommonModule, RouterLink, RouterLinkActive, RouterOutlet],
+    imports: [CommonModule, FormsModule, RouterLink, RouterLinkActive, RouterOutlet],
     templateUrl: './shell.component.html',
 })
 export class ShellComponent {
@@ -83,11 +86,24 @@ export class ShellComponent {
         return !!this.auth.user()?.is_admin;
     }
 
-    constructor(public auth: AuthService, public cart: CartService, private router: Router) {
+    constructor(
+        public auth: AuthService,
+        public cart: CartService,
+        public search: SearchService,
+        private router: Router,
+    ) {
         // Auto-close mobile drawer on navigation.
         this.router.events
             .pipe(filter(e => e instanceof NavigationEnd))
             .subscribe(() => this.mobileOpen.set(false));
+    }
+
+    /** Buscador global (cliente): actualiza el texto y asegura estar en el catálogo. */
+    onSearch(value: string) {
+        this.search.query.set(value);
+        if (!this.router.url.startsWith('/catalogo')) {
+            this.router.navigate(['/catalogo']);
+        }
     }
 
     toggleSidebar() {
