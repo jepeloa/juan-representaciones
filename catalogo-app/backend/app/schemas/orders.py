@@ -4,13 +4,9 @@ from pydantic import BaseModel, Field
 
 
 class PaymentConditionIn(BaseModel):
-    name: str = Field(min_length=1, max_length=120)
-    description: str | None = None
-    multiplier: Decimal = Decimal('1.0000')
-    days: int | None = None
-    is_active: bool = True
-    sort_order: int = 0
-    supplier_ids: list[int] = []  # marcas a las que aplica
+    # La condición es un único texto libre (se copia/pega). El resto queda con
+    # valores por defecto en el modelo.
+    text: str = Field(min_length=1)
 
 
 class PaymentConditionOut(BaseModel):

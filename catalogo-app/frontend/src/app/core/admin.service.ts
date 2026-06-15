@@ -149,13 +149,7 @@ export interface AdminPaymentCondition {
 }
 
 export interface PaymentConditionBody {
-    name: string;
-    description?: string | null;
-    multiplier: number;
-    days?: number | null;
-    is_active: boolean;
-    sort_order: number;
-    supplier_ids: number[];
+    text: string;
 }
 
 export interface OfferBody {

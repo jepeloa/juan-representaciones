@@ -32,9 +32,8 @@ def list_conditions(db: Session = Depends(get_db), _: User = Depends(require_adm
 
 @router.post('/payment-conditions', response_model=PaymentConditionOut, status_code=status.HTTP_201_CREATED)
 def create_condition(body: PaymentConditionIn, db: Session = Depends(get_db), _: User = Depends(require_admin)):
-    data = body.model_dump()
-    data.pop('supplier_ids', None)  # la asociación a marcas se gestiona desde Marcas
-    pc = PaymentCondition(**data)
+    text = body.text.strip()
+    pc = PaymentCondition(name=text[:120], description=text)
     db.add(pc)
     db.commit()
     db.refresh(pc)
@@ -46,10 +45,9 @@ def update_condition(cond_id: int, body: PaymentConditionIn, db: Session = Depen
     pc = db.get(PaymentCondition, cond_id)
     if not pc:
         raise HTTPException(status.HTTP_404_NOT_FOUND, 'Condición no encontrada')
-    data = body.model_dump()
-    data.pop('supplier_ids', None)  # la asociación a marcas se gestiona desde Marcas
-    for k, v in data.items():
-        setattr(pc, k, v)
+    text = body.text.strip()
+    pc.name = text[:120]
+    pc.description = text
     db.commit()
     db.refresh(pc)
     return _cond_out(pc)

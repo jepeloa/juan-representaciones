@@ -19,43 +19,12 @@
         </div>
 
         <form *ngIf="showForm()" (ngSubmit)="saveCondition()" class="p-5 bg-cream-50 border-b border-cream-200 space-y-4">
-            <div class="grid md:grid-cols-2 gap-4">
-                <div>
-                    <label class="label mb-1 block">Nombre *</label>
-                    <input class="input" [(ngModel)]="form.name" name="cname" required placeholder="ej. Cheque 60 días"/>
-                </div>
-                <div>
-                    <label class="label mb-1 block">Descripción</label>
-                    <input class="input" [(ngModel)]="form.description" name="cdesc" placeholder="ej. Lista + 8%"/>
-                </div>
-                <div>
-                    <label class="label mb-1 flex items-center justify-between">
-                        <span>Multiplicador *</span>
-                        <span class="text-slate-500 font-normal normal-case">
-                            <span class="badge bg-beige-100 text-beige-700">{{ pctLabel(form.multiplier) }}</span>
-                        </span>
-                    </label>
-                    <input class="input" type="number" step="0.01" min="0" [(ngModel)]="form.multiplier" name="cmult"/>
-                    <p class="text-xs text-slate-400 mt-1">1.00 = precio lista · 1.10 = +10% · 0.95 = −5%</p>
-                </div>
-                <div>
-                    <label class="label mb-1 block">Días</label>
-                    <input class="input" type="number" [(ngModel)]="form.days" name="cdays" placeholder="ej. 30, 60, 90"/>
-                </div>
-                <div>
-                    <label class="label mb-1 block">Orden</label>
-                    <input class="input" type="number" [(ngModel)]="form.sort_order" name="corder"/>
-                </div>
-                <div class="flex items-end">
-                    <label class="inline-flex items-center gap-2 text-sm text-slate-700">
-                        <input type="checkbox" class="accent-brand-500 w-4 h-4" [(ngModel)]="form.is_active" name="cactive"/>
-                        Activa
-                    </label>
-                </div>
+            <div>
+                <label class="label mb-1 block">Condición de pago</label>
+                <textarea class="input" rows="5" [(ngModel)]="form.text" name="ctext"
+                          placeholder="Pegá acá el texto de la condición de pago…"></textarea>
+                <p class="text-xs text-slate-400 mt-1">La asociás a las marcas desde la sección <b>Marcas</b>.</p>
             </div>
-
-            <p class="text-xs text-slate-400">La asociación a marcas se hace desde la sección <b>Marcas</b>.</p>
-
             <div class="flex justify-end gap-2 pt-2">
                 <button type="button" class="btn-ghost" (click)="showForm.set(false)">Cancelar</button>
                 <button type="submit" class="btn-primary" [disabled]="savingCondition()">
@@ -64,75 +33,15 @@
             </div>
         </form>
 
-        <!-- Desktop table -->
-        <div class="hidden md:block overflow-x-auto">
-            <table class="w-full text-sm">
-                <thead class="bg-white text-slate-600 border-b border-cream-200">
-                    <tr>
-                        <th class="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wider w-12">#</th>
-                        <th class="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wider">Nombre</th>
-                        <th class="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wider">Descripción</th>
-                        <th class="py-3 px-4 text-right text-xs font-semibold uppercase tracking-wider">Mult.</th>
-                        <th class="py-3 px-4 text-right text-xs font-semibold uppercase tracking-wider w-20">Días</th>
-                        <th class="py-3 px-4 text-center text-xs font-semibold uppercase tracking-wider w-24">Estado</th>
-                        <th class="py-3 px-4 text-right text-xs font-semibold uppercase tracking-wider w-40">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-cream-100">
-                    <tr *ngFor="let c of conditions()" class="hover:bg-cream-50">
-                        <td class="py-3 px-4 text-slate-400 text-xs">{{ c.sort_order }}</td>
-                        <td class="py-3 px-4 font-semibold text-slate-800">
-                            {{ c.name }}
-                            <span *ngIf="supplierNames(c)" class="block text-xs font-normal text-brand-600 mt-0.5">{{ supplierNames(c) }}</span>
-                            <span *ngIf="!supplierNames(c)" class="block text-xs font-normal text-slate-400 mt-0.5">Sin marcas</span>
-                        </td>
-                        <td class="py-3 px-4 text-slate-500 text-xs">{{ c.description || '—' }}</td>
-                        <td class="py-3 px-4 text-right">
-                            <span class="badge bg-beige-100 text-beige-700">{{ pctLabel(c.multiplier) }}</span>
-                            <span class="block text-xs text-slate-400 mt-0.5 tabular-nums">× {{ c.multiplier }}</span>
-                        </td>
-                        <td class="py-3 px-4 text-right text-slate-600 tabular-nums">{{ c.days ?? '—' }}</td>
-                        <td class="py-3 px-4 text-center">
-                            <span class="badge"
-                                  [class.bg-sage-100]="c.is_active" [class.text-sage-700]="c.is_active"
-                                  [class.bg-blush-100]="!c.is_active" [class.text-blush-500]="!c.is_active">
-                                {{ c.is_active ? 'Activa' : 'Inactiva' }}
-                            </span>
-                        </td>
-                        <td class="py-3 px-4 text-right whitespace-nowrap">
-                            <button class="btn-ghost text-xs" (click)="edit(c)">Editar</button>
-                            <button class="btn-ghost text-xs text-blush-500 hover:bg-blush-50" (click)="confirmDelete(c)">Eliminar</button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            <div *ngIf="!conditions().length && !loading()" class="py-10 text-center text-slate-400 text-sm">
-                No hay condiciones cargadas.
-            </div>
-        </div>
-
-        <!-- Mobile list -->
-        <div class="md:hidden divide-y divide-cream-100">
-            <div *ngFor="let c of conditions()" class="p-3">
-                <div class="flex items-start justify-between gap-2">
-                    <div class="flex-1 min-w-0">
-                        <p class="font-semibold text-slate-800">{{ c.name }}</p>
-                        <p *ngIf="c.description" class="text-xs text-slate-500 mt-0.5">{{ c.description }}</p>
-                        <p class="text-xs text-slate-400 mt-1 tabular-nums">
-                            <span *ngIf="c.days !== null">{{ c.days }} días · </span>
-                            <span>× {{ c.multiplier }}</span>
-                        </p>
-                    </div>
-                    <div class="flex flex-col items-end gap-1 shrink-0">
-                        <span class="badge bg-beige-100 text-beige-700">{{ pctLabel(c.multiplier) }}</span>
-                        <span class="badge"
-                              [class.bg-sage-100]="c.is_active" [class.text-sage-700]="c.is_active"
-                              [class.bg-blush-100]="!c.is_active" [class.text-blush-500]="!c.is_active">
-                            {{ c.is_active ? 'Activa' : 'Inactiva' }}
-                        </span>
-                    </div>
+        <!-- Lista de condiciones -->
+        <div class="divide-y divide-cream-100">
+            <div *ngFor="let c of conditions()" class="p-4 flex items-start justify-between gap-3 hover:bg-cream-50">
+                <div class="min-w-0">
+                    <p class="text-sm text-slate-800 whitespace-pre-line">{{ c.description || c.name }}</p>
+                    <p *ngIf="supplierNames(c)" class="text-xs text-brand-600 mt-1">Marcas: {{ supplierNames(c) }}</p>
+                    <p *ngIf="!supplierNames(c)" class="text-xs text-slate-400 mt-1">Sin marcas asociadas</p>
                 </div>
-                <div class="flex justify-end gap-1 mt-2 border-t border-cream-100 pt-2">
+                <div class="flex flex-col items-end gap-1 shrink-0 whitespace-nowrap">
                     <button class="btn-ghost text-xs" (click)="edit(c)">Editar</button>
                     <button class="btn-ghost text-xs text-blush-500 hover:bg-blush-50" (click)="confirmDelete(c)">Eliminar</button>
                 </div>

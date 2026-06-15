@@ -68,8 +68,7 @@
         </div>
         <div class="p-4 space-y-2 max-h-[60vh] overflow-y-auto">
             <div *ngFor="let c of s.payment_conditions" class="rounded-lg border border-cream-200 px-3 py-2">
-                <p class="font-semibold text-slate-800">{{ c.name }}</p>
-                <p *ngIf="c.description" class="text-sm text-slate-500">{{ c.description }}</p>
+                <p class="text-sm text-slate-700 whitespace-pre-line">{{ c.description || c.name }}</p>
             </div>
         </div>
     </div>
@@ -94,11 +93,7 @@
                    [class.border-cream-200]="!isCondSelected(c.id)">
                 <input type="checkbox" class="accent-brand-500 w-4 h-4 mt-0.5"
                        [checked]="isCondSelected(c.id)" (change)="toggleCond(c.id)"/>
-                <span class="min-w-0">
-                    <span class="font-semibold text-slate-800">{{ c.name }}</span>
-                    <span *ngIf="!c.is_active" class="ml-1 badge bg-beige-100 text-beige-700">inactiva</span>
-                    <span *ngIf="c.description" class="block text-xs text-slate-500">{{ c.description }}</span>
-                </span>
+                <span class="min-w-0 text-sm text-slate-700 whitespace-pre-line">{{ c.description || c.name }}</span>
             </label>
         </div>
         <div class="flex justify-end gap-2 p-4 border-t border-cream-200 bg-cream-50">

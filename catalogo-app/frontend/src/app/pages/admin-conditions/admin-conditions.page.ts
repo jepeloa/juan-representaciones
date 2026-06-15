@@ -50,16 +50,7 @@ export class AdminConditionsPage implements OnInit {
     }
 
     emptyForm(): PaymentConditionBody {
-        return { name: '', description: '', multiplier: 1.0, days: null, is_active: true, sort_order: 0, supplier_ids: [] };
-    }
-
-    isSupplierSelected(id: number): boolean {
-        return (this.form.supplier_ids ?? []).includes(id);
-    }
-
-    toggleSupplier(id: number) {
-        const cur = this.form.supplier_ids ?? [];
-        this.form.supplier_ids = cur.includes(id) ? cur.filter(x => x !== id) : [...cur, id];
+        return { text: '' };
     }
 
     supplierNames(c: AdminPaymentCondition): string {
@@ -70,8 +61,6 @@ export class AdminConditionsPage implements OnInit {
     openNew() {
         this.editingId.set(null);
         this.form = this.emptyForm();
-        const maxOrder = this.conditions().reduce((m, c) => Math.max(m, c.sort_order), 0);
-        this.form.sort_order = maxOrder + 1;
         this.showForm.set(true);
         this.error.set(null);
         this.successMsg.set(null);
@@ -79,34 +68,17 @@ export class AdminConditionsPage implements OnInit {
 
     edit(c: AdminPaymentCondition) {
         this.editingId.set(c.id);
-        this.form = {
-            name: c.name,
-            description: c.description || '',
-            multiplier: Number(c.multiplier),
-            days: c.days,
-            is_active: c.is_active,
-            sort_order: c.sort_order,
-            supplier_ids: [...(c.supplier_ids ?? [])],
-        };
+        this.form = { text: c.description || c.name };
         this.showForm.set(true);
         this.error.set(null);
         this.successMsg.set(null);
     }
 
     saveCondition() {
-        if (!this.form.name?.trim()) { this.error.set('El nombre es obligatorio'); return; }
-        if (this.form.multiplier === null || this.form.multiplier === undefined) { this.error.set('El multiplicador es obligatorio'); return; }
+        if (!this.form.text?.trim()) { this.error.set('Escribí la condición'); return; }
         this.savingCondition.set(true);
         this.error.set(null);
-        const body: PaymentConditionBody = {
-            name: this.form.name.trim(),
-            description: this.form.description || null,
-            multiplier: Number(this.form.multiplier),
-            days: this.form.days,
-            is_active: this.form.is_active,
-            sort_order: this.form.sort_order,
-            supplier_ids: this.form.supplier_ids ?? [],
-        };
+        const body: PaymentConditionBody = { text: this.form.text.trim() };
         const editId = this.editingId();
         const op = editId
             ? this.admin.updateCondition(editId, body)
