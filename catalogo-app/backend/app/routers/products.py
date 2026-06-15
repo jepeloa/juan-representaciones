@@ -31,9 +31,11 @@ def _row_to_out(product: Product) -> ProductOut:
         supplier_name=product.supplier.name if product.supplier else '',
         category_id=product.category_id,
         category_name=product.category.name if product.category else None,
+        # Las condiciones de pago ahora viven en la MARCA (no en el producto)
         payment_conditions=[
             PaymentConditionBrief(id=c.id, name=c.name, description=c.description)
-            for c in product.payment_conditions
+            for c in (product.supplier.payment_conditions if product.supplier else [])
+            if c.is_active
         ],
         thumbnail=thumb,
     )
@@ -56,10 +58,9 @@ def list_products(
     _: User = Depends(get_current_user),
 ):
     stmt = select(Product).options(
-        selectinload(Product.supplier),
+        selectinload(Product.supplier).selectinload(Supplier.payment_conditions),
         selectinload(Product.category),
         selectinload(Product.images),
-        selectinload(Product.payment_conditions),
     )
     if supplier_id:
         stmt = stmt.where(Product.supplier_id == supplier_id)
@@ -175,7 +176,7 @@ def get_product(product_id: int, db: Session = Depends(get_db), _: User = Depend
     p = db.execute(
         select(Product)
         .options(
-            selectinload(Product.supplier),
+            selectinload(Product.supplier).selectinload(Supplier.payment_conditions),
             selectinload(Product.category),
             selectinload(Product.images),
         )

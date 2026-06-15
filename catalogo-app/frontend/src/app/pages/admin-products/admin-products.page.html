@@ -110,28 +110,6 @@
             </div>
         </div>
 
-        <!-- Condiciones de pago (varias) -->
-        <div>
-            <label class="label mb-1 block">Condiciones de pago</label>
-            <p *ngIf="!conditions().length" class="text-xs text-slate-400">
-                No hay condiciones cargadas. Cargalas en “Condiciones”.
-            </p>
-            <div *ngIf="conditions().length" class="flex flex-wrap gap-2">
-                <label *ngFor="let c of conditions()"
-                       class="inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-sm cursor-pointer select-none"
-                       [class.border-brand-400]="isCondSelected(c.id)"
-                       [class.bg-brand-50]="isCondSelected(c.id)"
-                       [class.border-cream-200]="!isCondSelected(c.id)">
-                    <input type="checkbox" class="accent-brand-500 w-4 h-4"
-                           [checked]="isCondSelected(c.id)" (change)="toggleCondition(c.id)"/>
-                    {{ c.name }}
-                </label>
-            </div>
-            <p *ngIf="conditions().length" class="text-xs text-slate-400 mt-1">
-                Podés elegir varias. Se listan en la orden. Se gestionan en “Condiciones”.
-            </p>
-        </div>
-
         <!-- Imagenes -->
         <div>
             <label class="label mb-2 block">Fotos</label>

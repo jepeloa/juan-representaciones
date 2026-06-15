@@ -10,6 +10,7 @@ class PaymentConditionIn(BaseModel):
     days: int | None = None
     is_active: bool = True
     sort_order: int = 0
+    supplier_ids: list[int] = []  # marcas a las que aplica
 
 
 class PaymentConditionOut(BaseModel):
@@ -20,6 +21,7 @@ class PaymentConditionOut(BaseModel):
     days: int | None
     is_active: bool
     sort_order: int
+    supplier_ids: list[int] = []
 
     class Config:
         from_attributes = True

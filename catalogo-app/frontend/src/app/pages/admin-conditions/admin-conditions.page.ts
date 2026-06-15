@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 import { AdminService, AdminPaymentCondition, AdminSettings, PaymentConditionBody } from '../../core/admin.service';
+import { CatalogService } from '../../core/catalog.service';
+import { Supplier } from '../../core/models';
 
 @Component({
     selector: 'app-admin-conditions',
@@ -12,6 +14,7 @@ import { AdminService, AdminPaymentCondition, AdminSettings, PaymentConditionBod
 })
 export class AdminConditionsPage implements OnInit {
     conditions = signal<AdminPaymentCondition[]>([]);
+    suppliers = signal<Supplier[]>([]);
     settings = signal<AdminSettings>({
         catalog_disclaimer: null,
         catalog_terms: null,
@@ -30,10 +33,11 @@ export class AdminConditionsPage implements OnInit {
     showForm = signal(false);
     form: PaymentConditionBody = this.emptyForm();
 
-    constructor(public admin: AdminService) {}
+    constructor(public admin: AdminService, private catalog: CatalogService) {}
 
     ngOnInit() {
         this.refresh();
+        this.catalog.suppliers().subscribe(s => this.suppliers.set(s));
     }
 
     refresh() {
@@ -46,7 +50,21 @@ export class AdminConditionsPage implements OnInit {
     }
 
     emptyForm(): PaymentConditionBody {
-        return { name: '', description: '', multiplier: 1.0, days: null, is_active: true, sort_order: 0 };
+        return { name: '', description: '', multiplier: 1.0, days: null, is_active: true, sort_order: 0, supplier_ids: [] };
+    }
+
+    isSupplierSelected(id: number): boolean {
+        return (this.form.supplier_ids ?? []).includes(id);
+    }
+
+    toggleSupplier(id: number) {
+        const cur = this.form.supplier_ids ?? [];
+        this.form.supplier_ids = cur.includes(id) ? cur.filter(x => x !== id) : [...cur, id];
+    }
+
+    supplierNames(c: AdminPaymentCondition): string {
+        const byId = new Map(this.suppliers().map(s => [s.id, s.name]));
+        return (c.supplier_ids ?? []).map(id => byId.get(id)).filter(Boolean).join(', ');
     }
 
     openNew() {
@@ -68,6 +86,7 @@ export class AdminConditionsPage implements OnInit {
             days: c.days,
             is_active: c.is_active,
             sort_order: c.sort_order,
+            supplier_ids: [...(c.supplier_ids ?? [])],
         };
         this.showForm.set(true);
         this.error.set(null);
@@ -86,6 +105,7 @@ export class AdminConditionsPage implements OnInit {
             days: this.form.days,
             is_active: this.form.is_active,
             sort_order: this.form.sort_order,
+            supplier_ids: this.form.supplier_ids ?? [],
         };
         const editId = this.editingId();
         const op = editId

@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session, selectinload
 from app.auth.deps import get_current_user
 from app.database import get_db
 from app.models import (
-    PaymentCondition, Setting, Order, OrderItem, Product, User,
+    PaymentCondition, Setting, Order, OrderItem, Product, User, Supplier,
 )
 from app.schemas import (
     PaymentConditionOut, OrderCreateIn, OrderOut, OrderItemOut, SettingsOut,
@@ -52,7 +52,7 @@ def _build_order_items(db: Session, items_in: list, condition: PaymentCondition 
     for it in items_in:
         product = db.execute(
             select(Product)
-            .options(selectinload(Product.supplier), selectinload(Product.payment_conditions))
+            .options(selectinload(Product.supplier).selectinload(Supplier.payment_conditions))
             .where(Product.id == it.product_id)
         ).scalar_one_or_none()
         if not product:
@@ -89,7 +89,9 @@ def _build_order_items(db: Session, items_in: list, condition: PaymentCondition 
             product_name=product.name,
             product_code=product.code,
             supplier_name=product.supplier.name if product.supplier else None,
-            payment_term=', '.join(c.name for c in product.payment_conditions) or None,
+            payment_term=(', '.join(
+                c.name for c in product.supplier.payment_conditions if c.is_active
+            ) if product.supplier else '') or None,
         ))
     return out_items, _quantize(sub_ars), _quantize(tot_ars), _quantize(sub_usd), _quantize(tot_usd)
 

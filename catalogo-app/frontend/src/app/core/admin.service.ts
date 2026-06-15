@@ -142,6 +142,7 @@ export interface AdminPaymentCondition {
     days: number | null;
     is_active: boolean;
     sort_order: number;
+    supplier_ids: number[];
 }
 
 export interface PaymentConditionBody {
@@ -151,6 +152,7 @@ export interface PaymentConditionBody {
     days?: number | null;
     is_active: boolean;
     sort_order: number;
+    supplier_ids: number[];
 }
 
 export interface OfferBody {

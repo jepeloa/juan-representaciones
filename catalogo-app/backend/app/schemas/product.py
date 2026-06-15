@@ -2,12 +2,22 @@ from decimal import Decimal
 from pydantic import BaseModel
 
 
+class PaymentConditionBrief(BaseModel):
+    id: int
+    name: str
+    description: str | None = None
+
+    class Config:
+        from_attributes = True
+
+
 class SupplierOut(BaseModel):
     id: int
     name: str
     slug: str
     image: str | None = None
     product_count: int | None = None
+    payment_conditions: list[PaymentConditionBrief] = []
 
     class Config:
         from_attributes = True
@@ -27,15 +37,6 @@ class ProductImageOut(BaseModel):
     id: int
     src: str
     position: int
-
-    class Config:
-        from_attributes = True
-
-
-class PaymentConditionBrief(BaseModel):
-    id: int
-    name: str
-    description: str | None = None
 
     class Config:
         from_attributes = True

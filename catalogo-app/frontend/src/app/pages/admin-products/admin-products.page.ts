@@ -148,7 +148,7 @@ export class AdminProductsPage implements OnInit {
             price: p.price !== null && p.price !== undefined ? String(p.price) : null,
             currency: p.currency,
             iva: p.iva,
-            payment_condition_ids: (p.payment_conditions ?? []).map(c => c.id),
+            payment_condition_ids: [],  // las condiciones ahora son por marca, no por producto
         };
         this.useNewSupplier = false;
         this.useNewCategory = false;

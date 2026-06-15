@@ -18,6 +18,9 @@ export class SuppliersPage implements OnInit {
     loading = signal(true);
     uploadingId = signal<number | null>(null);
 
+    // Modal de condiciones de pago de una marca
+    conditionsOf = signal<Supplier | null>(null);
+
     constructor(private svc: CatalogService, public auth: AuthService, private admin: AdminService) {}
 
     get isAdmin(): boolean {
@@ -48,6 +51,16 @@ export class SuppliersPage implements OnInit {
             },
             error: () => { this.uploadingId.set(null); input.value = ''; },
         });
+    }
+
+    openConditions(supplier: Supplier, ev: Event) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        this.conditionsOf.set(supplier);
+    }
+
+    closeConditions() {
+        this.conditionsOf.set(null);
     }
 
     clearImage(supplier: Supplier, ev: Event) {

@@ -17,6 +17,7 @@ export interface Supplier {
     slug: string;
     image: string | null;
     product_count: number;
+    payment_conditions: { id: number; name: string; description?: string | null }[];
 }
 
 export interface Category {

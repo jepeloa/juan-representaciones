@@ -1,7 +1,16 @@
-from sqlalchemy import String
+from sqlalchemy import String, ForeignKey, Table, Column
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
+
+
+# Condiciones de pago por MARCA (N-a-N)
+supplier_payment_conditions = Table(
+    'supplier_payment_conditions',
+    Base.metadata,
+    Column('supplier_id', ForeignKey('suppliers.id', ondelete='CASCADE'), primary_key=True),
+    Column('payment_condition_id', ForeignKey('payment_conditions.id', ondelete='CASCADE'), primary_key=True),
+)
 
 
 class Supplier(Base):
@@ -14,3 +23,7 @@ class Supplier(Base):
     image: Mapped[str | None] = mapped_column(String(500), nullable=True)
 
     products: Mapped[list['Product']] = relationship(back_populates='supplier')  # noqa: F821
+    payment_conditions: Mapped[list['PaymentCondition']] = relationship(  # noqa: F821
+        secondary=supplier_payment_conditions, lazy='selectin',
+        order_by='PaymentCondition.sort_order', back_populates='suppliers',
+    )

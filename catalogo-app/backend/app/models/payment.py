@@ -1,6 +1,6 @@
 from decimal import Decimal
 from sqlalchemy import String, Boolean, Integer, Numeric, Text
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
 
@@ -23,3 +23,8 @@ class PaymentCondition(Base):
     days: Mapped[int | None] = mapped_column(Integer, nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     sort_order: Mapped[int] = mapped_column(Integer, default=0)
+
+    # Marcas a las que aplica esta condición (N-a-N)
+    suppliers: Mapped[list['Supplier']] = relationship(  # noqa: F821
+        secondary='supplier_payment_conditions', lazy='selectin', back_populates='payment_conditions',
+    )

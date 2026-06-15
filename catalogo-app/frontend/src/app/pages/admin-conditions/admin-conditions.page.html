@@ -53,6 +53,24 @@
                     </label>
                 </div>
             </div>
+
+            <!-- Marcas a las que aplica -->
+            <div>
+                <label class="label mb-1 block">Marcas a las que aplica</label>
+                <p *ngIf="!suppliers().length" class="text-xs text-slate-400">No hay marcas cargadas.</p>
+                <div *ngIf="suppliers().length" class="flex flex-wrap gap-2">
+                    <label *ngFor="let s of suppliers()"
+                           class="inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-sm cursor-pointer transition"
+                           [class.border-brand-300]="isSupplierSelected(s.id)" [class.bg-brand-50]="isSupplierSelected(s.id)"
+                           [class.text-brand-700]="isSupplierSelected(s.id)" [class.border-cream-200]="!isSupplierSelected(s.id)">
+                        <input type="checkbox" class="accent-brand-500 w-4 h-4"
+                               [checked]="isSupplierSelected(s.id)" (change)="toggleSupplier(s.id)"/>
+                        {{ s.name }}
+                    </label>
+                </div>
+                <p class="text-xs text-slate-400 mt-1">Estas condiciones se muestran en cada marca seleccionada.</p>
+            </div>
+
             <div class="flex justify-end gap-2 pt-2">
                 <button type="button" class="btn-ghost" (click)="showForm.set(false)">Cancelar</button>
                 <button type="submit" class="btn-primary" [disabled]="savingCondition()">
@@ -78,7 +96,11 @@
                 <tbody class="divide-y divide-cream-100">
                     <tr *ngFor="let c of conditions()" class="hover:bg-cream-50">
                         <td class="py-3 px-4 text-slate-400 text-xs">{{ c.sort_order }}</td>
-                        <td class="py-3 px-4 font-semibold text-slate-800">{{ c.name }}</td>
+                        <td class="py-3 px-4 font-semibold text-slate-800">
+                            {{ c.name }}
+                            <span *ngIf="supplierNames(c)" class="block text-xs font-normal text-brand-600 mt-0.5">{{ supplierNames(c) }}</span>
+                            <span *ngIf="!supplierNames(c)" class="block text-xs font-normal text-slate-400 mt-0.5">Sin marcas</span>
+                        </td>
                         <td class="py-3 px-4 text-slate-500 text-xs">{{ c.description || '—' }}</td>
                         <td class="py-3 px-4 text-right">
                             <span class="badge bg-beige-100 text-beige-700">{{ pctLabel(c.multiplier) }}</span>
