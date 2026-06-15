@@ -34,9 +34,20 @@ export class AdminOffersPage implements OnInit {
     constructor(private admin: AdminService, private catalog: CatalogService) {}
 
     ngOnInit() {
-        // Catálogo completo para poblar el desplegable
-        this.catalog.list({ page_size: 1000, sort: 'name' }).subscribe(res => this.allProducts.set(res.items));
+        this.loadAllProducts();
         this.loadOffers();
+    }
+
+    /** Trae el catálogo completo para el desplegable (el backend limita page_size a 200). */
+    private loadAllProducts(page = 1, acc: Product[] = []) {
+        this.catalog.list({ page_size: 200, page, sort: 'name' }).subscribe(res => {
+            const all = [...acc, ...res.items];
+            if (res.items.length && all.length < res.total) {
+                this.loadAllProducts(page + 1, all);
+            } else {
+                this.allProducts.set(all);
+            }
+        });
     }
 
     /** Productos que todavía no están en oferta, agrupados por proveedor. */
