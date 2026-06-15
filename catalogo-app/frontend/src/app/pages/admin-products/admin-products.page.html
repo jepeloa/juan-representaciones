@@ -28,7 +28,7 @@
         <!-- Proveedor + Categoría -->
         <div class="grid md:grid-cols-2 gap-4">
             <div>
-                <label class="label mb-1 block">Proveedor {{ !editingId() ? '*' : '' }}</label>
+                <label class="label mb-1 block">Marca {{ !editingId() ? '*' : '' }}</label>
                 <div *ngIf="!useNewSupplier" class="flex gap-2">
                     <select class="input flex-1" [(ngModel)]="form.supplier_id" name="supplier_id" (ngModelChange)="onSupplierSelect()">
                         <option [ngValue]="null">— Elegir —</option>
@@ -37,7 +37,7 @@
                     <button type="button" class="btn-outline text-sm" (click)="useNewSupplier = true; form.supplier_id = null">+ Nuevo</button>
                 </div>
                 <div *ngIf="useNewSupplier" class="flex gap-2">
-                    <input class="input flex-1" placeholder="Nombre del nuevo proveedor" [(ngModel)]="newSupplierName" name="new_sup"/>
+                    <input class="input flex-1" placeholder="Nombre de la nueva marca" [(ngModel)]="newSupplierName" name="new_sup"/>
                     <button type="button" class="btn-ghost text-sm" (click)="useNewSupplier = false; newSupplierName = ''">×</button>
                 </div>
             </div>
@@ -195,7 +195,7 @@
             <input class="input" placeholder="Producto, código, descripción…" [(ngModel)]="q" (ngModelChange)="onSearchInput()"/>
         </div>
         <div class="md:col-span-5">
-            <label class="label mb-1 block">Proveedor</label>
+            <label class="label mb-1 block">Marca</label>
             <select class="input" [(ngModel)]="filterSupplierId" (ngModelChange)="onFilterSupplier()">
                 <option [ngValue]="null">Todos</option>
                 <option *ngFor="let s of suppliers()" [ngValue]="s.id">{{ s.name }}</option>
@@ -209,7 +209,7 @@
             <thead class="bg-cream-100 text-slate-600 border-b border-cream-200">
                 <tr>
                     <th class="w-14 py-3 px-3 text-left text-xs font-semibold uppercase tracking-wider">Foto</th>
-                    <th class="py-3 px-3 text-left text-xs font-semibold uppercase tracking-wider">Proveedor</th>
+                    <th class="py-3 px-3 text-left text-xs font-semibold uppercase tracking-wider">Marca</th>
                     <th class="py-3 px-3 text-left text-xs font-semibold uppercase tracking-wider hidden lg:table-cell">Categoría</th>
                     <th class="py-3 px-3 text-left text-xs font-semibold uppercase tracking-wider hidden lg:table-cell">Código</th>
                     <th class="py-3 px-3 text-left text-xs font-semibold uppercase tracking-wider">Producto</th>

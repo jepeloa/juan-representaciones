@@ -4,7 +4,7 @@
             <h2 class="font-display text-xl md:text-2xl font-bold text-slate-800">🔥 Ofertas</h2>
             <p class="text-xs md:text-sm text-slate-500">{{ products().length }} productos con descuento</p>
         </div>
-        <a routerLink="/catalogo" class="btn-ghost text-sm">← Volver al catálogo</a>
+        <a routerLink="/catalogo" class="btn-ghost text-sm">← Volver a Categoría</a>
     </div>
 
     <!-- Loading -->
@@ -13,7 +13,7 @@
     <!-- Empty -->
     <div *ngIf="!loading() && !products().length" class="card p-12 text-center">
         <p class="text-slate-500 mb-4">No hay ofertas activas en este momento.</p>
-        <a routerLink="/catalogo" class="btn-primary inline-flex">Ir al catálogo</a>
+        <a routerLink="/catalogo" class="btn-primary inline-flex">Ir a Categoría</a>
     </div>
 
     <!-- Grid -->

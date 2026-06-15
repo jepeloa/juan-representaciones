@@ -263,7 +263,7 @@ export class AdminProductsPage implements OnInit {
         }
         const editId = this.editingId();
         if (!editId && !body.supplier_id && !body.supplier_name) {
-            this.error.set('Elegí o creá un proveedor');
+            this.error.set('Elegí o creá una marca');
             return;
         }
         this.saving.set(true);
