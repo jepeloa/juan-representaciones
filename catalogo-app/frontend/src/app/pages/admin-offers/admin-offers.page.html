@@ -11,37 +11,36 @@
         {{ error() }}
     </div>
 
-    <!-- Buscador para agregar -->
+    <!-- Agregar producto a oferta (desplegable) -->
     <div class="card p-4 md:p-5 space-y-3">
         <h3 class="font-display text-lg font-semibold text-slate-800">Agregar producto a oferta</h3>
-        <input class="input" [(ngModel)]="q" (ngModelChange)="onSearchInput()" name="q"
-               placeholder="Buscar producto por nombre, código o descripción…"/>
-
-        <div *ngIf="searching()" class="text-sm text-slate-400 py-2">Buscando…</div>
-
-        <div *ngIf="searchResults().length" class="divide-y divide-cream-100 border border-cream-200 rounded-lg overflow-hidden">
-            <div *ngFor="let p of searchResults()" class="flex items-center gap-3 p-3 hover:bg-cream-50">
-                <div class="w-12 h-12 rounded-md bg-cream-100 overflow-hidden flex-shrink-0">
-                    <img *ngIf="p.thumbnail" [src]="p.thumbnail" class="w-full h-full object-cover"/>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <p class="text-sm font-semibold text-slate-800 truncate">{{ p.name }}</p>
-                    <p class="text-xs text-slate-500">
-                        {{ p.supplier_name }} · Lista: <b>{{ fmtPrice(p.price, p.currency) }}</b>
-                    </p>
-                </div>
-                <div class="flex items-center gap-2 shrink-0">
-                    <input class="input w-32 text-right" type="text" inputmode="decimal"
-                           [(ngModel)]="priceInput[p.id]" [name]="'np' + p.id" placeholder="Precio oferta"/>
-                    <span *ngIf="offerPct(p, priceInput[p.id]) > 0" class="badge bg-blush-100 text-blush-600 w-14 text-center">
-                        -{{ offerPct(p, priceInput[p.id]) }}%
+        <div class="grid md:grid-cols-[1fr_auto_auto] gap-3 items-end">
+            <div>
+                <label class="label mb-1 block">Producto</label>
+                <select class="input" [(ngModel)]="selectedId" name="sel">
+                    <option [ngValue]="null" disabled>Elegí un producto…</option>
+                    <optgroup *ngFor="let g of availableGroups()" [label]="g.supplier">
+                        <option *ngFor="let p of g.items" [ngValue]="p.id">
+                            {{ p.name }}{{ p.code ? ' · ' + p.code : '' }} — {{ fmtPrice(p.price, p.currency) }}
+                        </option>
+                    </optgroup>
+                </select>
+            </div>
+            <div>
+                <label class="label mb-1 block">Precio de oferta</label>
+                <div class="flex items-center gap-2">
+                    <input class="input w-36 text-right" type="text" inputmode="decimal"
+                           [(ngModel)]="addPrice" name="addPrice" placeholder="0"/>
+                    <span *ngIf="selectedProduct() && offerPct(selectedProduct()!, addPrice) > 0"
+                          class="badge bg-blush-100 text-blush-600 w-14 text-center">
+                        -{{ offerPct(selectedProduct()!, addPrice) }}%
                     </span>
-                    <button class="btn-primary text-sm whitespace-nowrap" (click)="addOffer(p)">Poner en oferta</button>
                 </div>
             </div>
+            <button class="btn-primary whitespace-nowrap" (click)="addOffer()">Poner en oferta</button>
         </div>
-        <p *ngIf="q && !searching() && !searchResults().length" class="text-sm text-slate-400 py-2">
-            Sin resultados nuevos para “{{ q }}”.
+        <p *ngIf="selectedProduct() as sp" class="text-xs text-slate-500">
+            {{ sp.supplier_name }} · Precio de lista: <b>{{ fmtPrice(sp.price, sp.currency) }}</b>
         </p>
     </div>
 
