@@ -1,11 +1,12 @@
 <div class="flex h-screen overflow-hidden bg-cream-50">
     <!-- Mobile backdrop -->
-    <div *ngIf="mobileOpen()"
+    <div *ngIf="mobileOpen() && isAdmin"
          class="md:hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-30"
          (click)="toggleMobile()"></div>
 
-    <!-- Sidebar -->
+    <!-- Sidebar (solo admin; el cliente navega desde la botonera superior) -->
     <aside
+        *ngIf="isAdmin"
         [class.md:w-64]="!sidebarCollapsed()"
         [class.md:w-20]="sidebarCollapsed()"
         [class.translate-x-0]="mobileOpen()"
@@ -65,23 +66,42 @@
     <div class="flex-1 flex flex-col overflow-hidden">
         <!-- Top bar -->
         <header class="flex items-center gap-2 bg-white border-b border-cream-200 px-3 md:px-6 h-14 md:h-16 shrink-0 shadow-soft z-10">
-            <button class="md:hidden p-2 -ml-1 rounded hover:bg-cream-100"
+            <button *ngIf="isAdmin" class="md:hidden p-2 -ml-1 rounded hover:bg-cream-100"
                     (click)="toggleMobile()" aria-label="Abrir menú">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/>
                 </svg>
             </button>
 
-            <!-- Mobile: show compact logo when sidebar is closed -->
-            <div class="md:hidden flex items-center gap-2">
+            <!-- Logo: en mobile siempre; en desktop también para el cliente (no tiene sidebar) -->
+            <div class="flex items-center gap-2" [class.md:hidden]="isAdmin">
                 <img src="logo.png" alt="JMG" class="h-9 object-contain"/>
             </div>
 
-            <h1 class="hidden md:block font-display text-base md:text-lg font-bold text-brand-900">Catálogo</h1>
-            <div class="flex-1"></div>
+            <h1 *ngIf="isAdmin" class="hidden md:block font-display text-base md:text-lg font-bold text-brand-900">Catálogo</h1>
 
-            <!-- Cart shortcut (mobile) -->
-            <a routerLink="/carrito"
+            <!-- Botonera de navegación (cliente): reemplaza al sidebar -->
+            <nav *ngIf="!isAdmin" class="flex-1 flex items-center gap-1 overflow-x-auto px-1 md:px-3 no-scrollbar">
+                <a *ngFor="let item of nav()"
+                   [routerLink]="item.route"
+                   routerLinkActive="bg-brand-50 text-brand-700 font-semibold"
+                   [routerLinkActiveOptions]="{exact: false}"
+                   class="group flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-cream-100 hover:text-slate-800 transition whitespace-nowrap">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 shrink-0">
+                        <path [attr.d]="item.icon"/>
+                    </svg>
+                    <span class="hidden sm:inline">{{ item.label }}</span>
+                    <span *ngIf="item.showBadge && cart.count() > 0"
+                          class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-brand-500 text-white text-xs font-bold">
+                        {{ cart.count() }}
+                    </span>
+                </a>
+            </nav>
+
+            <div class="flex-1" [class.hidden]="!isAdmin"></div>
+
+            <!-- Cart shortcut (mobile, solo admin: el cliente tiene "Mi orden" en la botonera) -->
+            <a *ngIf="isAdmin" routerLink="/carrito"
                class="md:hidden relative w-10 h-10 rounded-full flex items-center justify-center text-slate-600 hover:bg-cream-100">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke="currentColor" class="w-5 h-5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"/>

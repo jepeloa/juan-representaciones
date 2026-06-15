@@ -79,6 +79,10 @@ export class ShellComponent {
         this.allNav.filter(item => !item.adminOnly || this.auth.user()?.is_admin),
     );
 
+    get isAdmin(): boolean {
+        return !!this.auth.user()?.is_admin;
+    }
+
     constructor(public auth: AuthService, public cart: CartService, private router: Router) {
         // Auto-close mobile drawer on navigation.
         this.router.events
