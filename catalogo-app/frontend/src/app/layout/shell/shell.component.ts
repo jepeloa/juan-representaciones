@@ -32,9 +32,9 @@ export class ShellComponent {
 
     private allNav: NavItem[] = [
         {
-            label: 'Marcas',
-            route: '/proveedores',
-            icon: 'M3 4.5h18v3H3zm2 5h14v10H5zM9 12h6v4H9z',
+            label: 'Producto',
+            route: '/catalogo',
+            icon: 'M3.75 6.75A2.25 2.25 0 0 1 6 4.5h12a2.25 2.25 0 0 1 2.25 2.25v10.5A2.25 2.25 0 0 1 18 19.5H6a2.25 2.25 0 0 1-2.25-2.25Zm3 0v.75h10.5v-.75H6.75ZM6.75 11.25h10.5v6H6.75Z',
         },
         {
             label: 'Ofertas',
@@ -48,9 +48,9 @@ export class ShellComponent {
             showBadge: true,
         },
         {
-            label: 'Productos',
-            route: '/catalogo',
-            icon: 'M3.75 6.75A2.25 2.25 0 0 1 6 4.5h12a2.25 2.25 0 0 1 2.25 2.25v10.5A2.25 2.25 0 0 1 18 19.5H6a2.25 2.25 0 0 1-2.25-2.25Zm3 0v.75h10.5v-.75H6.75ZM6.75 11.25h10.5v6H6.75Z',
+            label: 'Marcas',
+            route: '/proveedores',
+            icon: 'M3 4.5h18v3H3zm2 5h14v10H5zM9 12h6v4H9z',
         },
         {
             label: 'Cargar productos',

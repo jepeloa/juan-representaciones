@@ -2,7 +2,7 @@
     <!-- Page header -->
     <div class="flex items-end justify-between flex-wrap gap-3">
         <div *ngIf="isAdmin">
-            <h2 class="font-display text-xl md:text-2xl font-bold text-slate-800">Productos</h2>
+            <h2 class="font-display text-xl md:text-2xl font-bold text-slate-800">Producto</h2>
             <p class="text-xs md:text-sm text-slate-500">{{ total() | number:'1.0-0' }} productos en {{ facets()?.suppliers?.length || 0 }} marcas</p>
         </div>
         <div *ngIf="!isAdmin"></div>
