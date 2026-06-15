@@ -6,8 +6,8 @@
             <p class="text-xs md:text-sm text-slate-500">{{ total() | number:'1.0-0' }} productos en {{ facets()?.suppliers?.length || 0 }} proveedores</p>
         </div>
 
-        <!-- View toggle (admin only) -->
-        <div *ngIf="isAdmin" class="inline-flex rounded-lg border border-cream-200 bg-white p-1 shadow-soft">
+        <!-- View toggle (grilla por defecto, disponible para todos) -->
+        <div class="inline-flex rounded-lg border border-cream-200 bg-white p-1 shadow-soft">
             <button
                 (click)="setView('table')"
                 [class.bg-brand-500]="view() === 'table'" [class.text-white]="view() === 'table'"

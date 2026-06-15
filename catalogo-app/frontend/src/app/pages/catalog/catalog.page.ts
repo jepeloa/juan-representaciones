@@ -73,8 +73,8 @@ export class CatalogPage implements OnInit {
         this.supplierId = qp.get('supplier') ? Number(qp.get('supplier')) : null;
         this.categoryName = qp.get('cat') || null;
         this.currency = qp.get('mon') ?? '';
-        // Everyone defaults to grid; admins can switch to table (persisted via ?view=)
-        this.view.set(this.isAdmin ? ((qp.get('view') as ViewMode) || 'grid') : 'grid');
+        // Todos (cliente y admin) arrancan en grilla y pueden cambiar a tabla (persistido vía ?view=)
+        this.view.set((qp.get('view') as ViewMode) || 'grid');
         this.page = Number(qp.get('page')) || 1;
 
         this.svc.facets().subscribe(f => {
