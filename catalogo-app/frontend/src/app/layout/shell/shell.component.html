@@ -77,10 +77,9 @@
             </button>
 
             <!-- Logo: en mobile siempre; en desktop también para el cliente. Más grande para el cliente. -->
-            <div class="flex items-center shrink-0" [class.md:hidden]="isAdmin">
-                <img src="logo.png" alt="JMG" class="object-contain"
-                     [class.h-10]="isAdmin"
-                     [class.h-14]="!isAdmin" [class.md:h-20]="!isAdmin"/>
+            <div class="flex items-center shrink-0" [class.md:hidden]="isAdmin" [class.self-stretch]="!isAdmin">
+                <img *ngIf="isAdmin" src="logo.png" alt="JMG" class="object-contain h-10"/>
+                <img *ngIf="!isAdmin" src="logo_login.png" alt="JMG — Juan Manuel Garcia" class="object-contain h-4/5 w-auto"/>
             </div>
 
             <h1 *ngIf="isAdmin" class="hidden md:block font-display text-base md:text-lg font-bold text-brand-900">Categoría</h1>
