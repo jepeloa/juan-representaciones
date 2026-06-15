@@ -104,9 +104,6 @@
                         <th class="py-3 px-3 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer select-none" (click)="onSort('supplier')">
                             Proveedor <span class="opacity-50">{{ sortIcon('supplier') }}</span>
                         </th>
-                        <th class="py-3 px-3 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer select-none hidden lg:table-cell" (click)="onSort('category')">
-                            Categoría <span class="opacity-50">{{ sortIcon('category') }}</span>
-                        </th>
                         <th class="py-3 px-3 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer select-none hidden lg:table-cell" (click)="onSort('code')">
                             Código <span class="opacity-50">{{ sortIcon('code') }}</span>
                         </th>
@@ -134,7 +131,6 @@
                             </ng-template>
                         </td>
                         <td class="py-2 px-3"><span class="badge bg-brand-50 text-brand-700">{{ p.supplier_name }}</span></td>
-                        <td class="py-2 px-3 text-slate-500 max-w-[200px] truncate hidden lg:table-cell" [title]="p.category_name || ''">{{ p.category_name }}</td>
                         <td class="py-2 px-3 text-slate-500 font-mono text-xs hidden lg:table-cell">{{ p.code }}</td>
                         <td class="py-2 px-3 font-medium text-slate-700 max-w-md truncate" [title]="p.name">{{ p.name }}</td>
                         <td class="py-2 px-3 text-right tabular-nums">
