@@ -4,7 +4,7 @@
         <p class="text-xs md:text-sm text-slate-500">{{ suppliers().length }} marcas</p>
     </div>
 
-    <div class="grid gap-4 md:gap-5 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+    <div class="grid gap-4 md:gap-5 grid-cols-2 md:grid-cols-3 lg:grid-cols-4 items-start">
         <div *ngFor="let s of suppliers()" class="card overflow-hidden flex flex-col hover:shadow-lift transition group">
             <a [routerLink]="['/catalogo']" [queryParams]="{ supplier: s.id }" class="block bg-cream-100">
                 <img *ngIf="s.image; else noimg" [src]="s.image" loading="lazy" class="block w-full h-auto" alt=""/>
