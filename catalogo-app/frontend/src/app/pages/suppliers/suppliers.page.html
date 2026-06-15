@@ -6,13 +6,13 @@
 
     <div class="grid gap-4 md:gap-5 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         <div *ngFor="let s of suppliers()" class="card overflow-hidden flex flex-col hover:shadow-lift transition group">
-            <a [routerLink]="['/catalogo']" [queryParams]="{ supplier: s.id }" class="block">
-                <div class="aspect-[4/3] bg-cream-100 flex items-center justify-center overflow-hidden">
-                    <img *ngIf="s.image; else noimg" [src]="s.image" loading="lazy" class="w-full h-full object-cover" alt=""/>
-                    <ng-template #noimg>
+            <a [routerLink]="['/catalogo']" [queryParams]="{ supplier: s.id }" class="block bg-cream-100">
+                <img *ngIf="s.image; else noimg" [src]="s.image" loading="lazy" class="block w-full h-auto" alt=""/>
+                <ng-template #noimg>
+                    <div class="aspect-[4/3] flex items-center justify-center">
                         <span class="text-5xl font-bold text-brand-200 uppercase">{{ s.name[0] }}</span>
-                    </ng-template>
-                </div>
+                    </div>
+                </ng-template>
             </a>
             <div class="p-3 flex flex-col gap-1 flex-1">
                 <a [routerLink]="['/catalogo']" [queryParams]="{ supplier: s.id }" class="block min-w-0">
