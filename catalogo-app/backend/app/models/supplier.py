@@ -10,5 +10,7 @@ class Supplier(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(120), unique=True, index=True)
     slug: Mapped[str] = mapped_column(String(120), unique=True, index=True)
+    # Foto/logo de la marca (ruta pública, ej. 'uploads/brands/xxx.jpg')
+    image: Mapped[str | None] = mapped_column(String(500), nullable=True)
 
     products: Mapped[list['Product']] = relationship(back_populates='supplier')  # noqa: F821

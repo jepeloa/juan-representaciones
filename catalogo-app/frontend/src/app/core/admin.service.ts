@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { API_BASE } from './api';
-import { Product, ProductDetail } from './models';
+import { Product, ProductDetail, Supplier } from './models';
 
 export interface AdminUser {
     id: number;
@@ -113,6 +113,16 @@ export class AdminService {
     }
     clearOffer(productId: number): Observable<void> {
         return this.http.delete<void>(`${API_BASE}/admin/offers/${productId}`);
+    }
+
+    // ===== Marcas (foto) =====
+    setSupplierImage(supplierId: number, file: File): Observable<Supplier> {
+        const fd = new FormData();
+        fd.append('file', file, file.name);
+        return this.http.post<Supplier>(`${API_BASE}/admin/suppliers/${supplierId}/image`, fd);
+    }
+    clearSupplierImage(supplierId: number): Observable<Supplier> {
+        return this.http.delete<Supplier>(`${API_BASE}/admin/suppliers/${supplierId}/image`);
     }
 
     // ===== Settings =====

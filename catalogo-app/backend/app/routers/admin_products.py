@@ -106,7 +106,15 @@ def _save_image_file(upload: UploadFile, supplier_slug: str) -> str:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, f'Formato no permitido: {suffix}. Usar JPG/PNG/WEBP.')
     raw = upload.file.read()
     try:
-        img = Image.open(io.BytesIO(raw)).convert('RGB')
+        img = Image.open(io.BytesIO(raw))
+        # Componer sobre blanco si tiene transparencia (logos PNG/WEBP)
+        if img.mode in ('RGBA', 'LA', 'P'):
+            img = img.convert('RGBA')
+            bg = Image.new('RGB', img.size, (255, 255, 255))
+            bg.paste(img, mask=img.split()[-1])
+            img = bg
+        else:
+            img = img.convert('RGB')
     except Exception as e:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, f'No se pudo leer la imagen: {e}')
     img.thumbnail((MAX_DIM, MAX_DIM), Image.LANCZOS)

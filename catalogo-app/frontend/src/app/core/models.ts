@@ -15,6 +15,7 @@ export interface Supplier {
     id: number;
     name: string;
     slug: string;
+    image: string | null;
     product_count: number;
 }
 

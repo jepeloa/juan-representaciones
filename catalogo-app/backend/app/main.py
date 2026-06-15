@@ -8,7 +8,7 @@ from app.models import User
 from app.auth.security import hash_password
 from app.routers import (
     auth, products, suppliers, categories,
-    admin_users, admin_products, admin_conditions, admin_offers,
+    admin_users, admin_products, admin_conditions, admin_offers, admin_suppliers,
     orders,
 )
 
@@ -102,6 +102,7 @@ app.include_router(admin_users.router)
 app.include_router(admin_products.router)
 app.include_router(admin_conditions.router)
 app.include_router(admin_offers.router)
+app.include_router(admin_suppliers.router)
 
 
 @app.get('/api/health')

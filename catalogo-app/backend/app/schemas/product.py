@@ -6,6 +6,7 @@ class SupplierOut(BaseModel):
     id: int
     name: str
     slug: str
+    image: str | None = None
     product_count: int | None = None
 
     class Config:

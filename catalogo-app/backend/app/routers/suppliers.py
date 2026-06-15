@@ -19,6 +19,6 @@ def list_suppliers(db: Session = Depends(get_db), _: User = Depends(get_current_
         .order_by(Supplier.name)
     )
     return [
-        SupplierOut(id=s.id, name=s.name, slug=s.slug, product_count=cnt)
+        SupplierOut(id=s.id, name=s.name, slug=s.slug, image=s.image, product_count=cnt)
         for s, cnt in db.execute(q).all()
     ]
