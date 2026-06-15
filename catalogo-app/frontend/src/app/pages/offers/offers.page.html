@@ -1,0 +1,70 @@
+<div class="p-3 md:p-6 space-y-4 md:space-y-6">
+    <div class="flex items-center justify-between gap-3">
+        <div>
+            <h2 class="font-display text-xl md:text-2xl font-bold text-slate-800">🔥 Ofertas</h2>
+            <p class="text-xs md:text-sm text-slate-500">{{ products().length }} productos con descuento</p>
+        </div>
+        <a routerLink="/catalogo" class="btn-ghost text-sm">← Volver al catálogo</a>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="loading()" class="py-20 text-center text-slate-400">Cargando ofertas…</div>
+
+    <!-- Empty -->
+    <div *ngIf="!loading() && !products().length" class="card p-12 text-center">
+        <p class="text-slate-500 mb-4">No hay ofertas activas en este momento.</p>
+        <a routerLink="/catalogo" class="btn-primary inline-flex">Ir al catálogo</a>
+    </div>
+
+    <!-- Grid -->
+    <div *ngIf="!loading() && products().length"
+         class="grid gap-4 md:gap-5 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        <div *ngFor="let p of products()" class="card overflow-hidden flex flex-col cursor-pointer hover:shadow-lift transition" (click)="openDetail(p)">
+            <div class="relative aspect-square bg-cream-100 flex items-center justify-center overflow-hidden">
+                <span class="absolute top-2 left-2 z-10 inline-flex items-center rounded-full bg-blush-500 text-white text-xs font-bold px-2 py-0.5 shadow-soft">
+                    {{ offerPct(p) > 0 ? '-' + offerPct(p) + '%' : 'OFERTA' }}
+                </span>
+                <img *ngIf="p.thumbnail; else noimgcard" [src]="p.thumbnail" loading="lazy" class="w-full h-full object-cover" alt=""/>
+                <ng-template #noimgcard>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-12 h-12 text-cream-300">
+                        <path d="M3 6a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V6Zm6 3a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm10 4-3-3-7 7H4l5-5 3 3 4-4 3 2v0Z"/>
+                    </svg>
+                </ng-template>
+            </div>
+            <div class="p-3 flex flex-col gap-1 flex-1">
+                <p class="text-xs uppercase tracking-wider text-slate-400 truncate">
+                    {{ p.supplier_name }}<span *ngIf="p.category_name"> · {{ p.category_name }}</span>
+                </p>
+                <h3 class="font-semibold text-slate-700 leading-snug line-clamp-2" [title]="p.name">{{ p.name }}</h3>
+                <p *ngIf="p.code" class="text-xs text-slate-500 font-mono">{{ p.code }}</p>
+                <div class="mt-auto pt-2 flex items-center justify-between gap-2">
+                    <div class="min-w-0">
+                        <span class="block text-xs text-slate-400 line-through leading-none">{{ fmtPrice(p.price, p.currency) }}</span>
+                        <span class="text-base font-bold text-blush-600">{{ fmtPrice(p.offer_price, p.currency) }}</span>
+                    </div>
+                    <button *ngIf="!cart.has(p.id); else inCartGrid" (click)="addToCart(p, $event)"
+                            class="w-10 h-10 rounded-lg bg-brand-500 text-white hover:bg-brand-600 transition flex items-center justify-center flex-shrink-0 shadow-soft"
+                            aria-label="Agregar a la orden" title="Agregar a la orden">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m-7-7h14"/>
+                        </svg>
+                    </button>
+                    <ng-template #inCartGrid>
+                        <div class="inline-flex items-center rounded-lg bg-sage-100 border border-sage-300 flex-shrink-0" (click)="$event.stopPropagation()">
+                            <button (click)="cart.update(p.id, cart.quantityOf(p.id) - 1)"
+                                    class="w-7 h-9 text-sage-700 font-bold rounded-l-lg text-base hover:bg-sage-200">−</button>
+                            <span class="min-w-[24px] text-center text-xs font-bold text-sage-700 tabular-nums">{{ cart.quantityOf(p.id) }}</span>
+                            <button (click)="cart.update(p.id, cart.quantityOf(p.id) + 1)"
+                                    class="w-7 h-9 text-sage-700 font-bold rounded-r-lg text-base hover:bg-sage-200">+</button>
+                        </div>
+                    </ng-template>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<app-product-detail-modal
+    [product]="selectedProduct()"
+    (close)="closeDetail()">
+</app-product-detail-modal>

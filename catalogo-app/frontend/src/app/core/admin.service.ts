@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { API_BASE } from './api';
-import { ProductDetail } from './models';
+import { Product, ProductDetail } from './models';
 
 export interface AdminUser {
     id: number;
@@ -104,6 +104,17 @@ export class AdminService {
         return this.http.delete<void>(`${API_BASE}/admin/payment-conditions/${id}`);
     }
 
+    // ===== Ofertas =====
+    listOffers(): Observable<Product[]> {
+        return this.http.get<Product[]>(`${API_BASE}/admin/offers`);
+    }
+    setOffer(productId: number, body: OfferBody): Observable<Product> {
+        return this.http.put<Product>(`${API_BASE}/admin/offers/${productId}`, body);
+    }
+    clearOffer(productId: number): Observable<void> {
+        return this.http.delete<void>(`${API_BASE}/admin/offers/${productId}`);
+    }
+
     // ===== Settings =====
     getSettings(): Observable<AdminSettings> {
         return this.http.get<AdminSettings>(`${API_BASE}/admin/settings`);
@@ -130,6 +141,11 @@ export interface PaymentConditionBody {
     days?: number | null;
     is_active: boolean;
     sort_order: number;
+}
+
+export interface OfferBody {
+    offer_price: number | null;
+    is_offer: boolean;
 }
 
 export interface AdminSettings {

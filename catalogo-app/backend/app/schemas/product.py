@@ -46,6 +46,8 @@ class ProductOut(BaseModel):
     name: str
     description: str | None
     price: Decimal | None
+    offer_price: Decimal | None = None
+    is_offer: bool = False
     currency: str | None
     iva: str | None
     supplier_id: int

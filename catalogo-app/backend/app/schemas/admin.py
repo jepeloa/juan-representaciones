@@ -44,3 +44,14 @@ class ProductWriteIn(BaseModel):
     unit_per_pack: int | None = None
     barcode: str | None = Field(default=None, max_length=60)
     notes: str | None = None
+
+
+# ===== Ofertas =====
+class OfferUpdateIn(BaseModel):
+    """Set/actualizar la oferta de un producto.
+
+    offer_price: precio rebajado fijo (en la moneda del producto).
+    is_offer: si la oferta está activa (visible en el catálogo).
+    """
+    offer_price: Decimal | None = Field(default=None, gt=0)
+    is_offer: bool = True

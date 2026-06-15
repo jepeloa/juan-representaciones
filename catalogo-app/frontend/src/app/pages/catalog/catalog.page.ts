@@ -26,6 +26,10 @@ export class CatalogPage implements OnInit {
     categories = signal<Category[]>([]);
     selectedProduct = signal<ProductDetail | null>(null);
 
+    // Popup de ofertas del día (se muestra una vez por sesión si hay ofertas activas).
+    offerPreview = signal<Product[]>([]);
+    showOffersPopup = signal(false);
+
     q = '';
     supplierId: number | null = null;
     categoryId: number | null = null;
@@ -81,6 +85,30 @@ export class CatalogPage implements OnInit {
         else this.svc.categories().subscribe(c => this.categories.set(c));
 
         this.fetch();
+        this.maybeShowOffers();
+    }
+
+    private static readonly OFFERS_SEEN_KEY = 'ofertas_popup_seen_v1';
+
+    /** Trae las ofertas activas y abre el popup una vez por sesión si hay alguna. */
+    private maybeShowOffers() {
+        const seen = sessionStorage.getItem(CatalogPage.OFFERS_SEEN_KEY);
+        this.svc.list({ on_offer: true, page_size: 8, sort: 'name' }).subscribe(res => {
+            this.offerPreview.set(res.items);
+            if (res.items.length && !seen) {
+                this.showOffersPopup.set(true);
+                sessionStorage.setItem(CatalogPage.OFFERS_SEEN_KEY, '1');
+            }
+        });
+    }
+
+    closeOffersPopup() {
+        this.showOffersPopup.set(false);
+    }
+
+    goToOffers() {
+        this.showOffersPopup.set(false);
+        this.router.navigate(['/ofertas']);
     }
 
     fetch() {
@@ -185,6 +213,18 @@ export class CatalogPage implements OnInit {
         if (Number.isNaN(n)) return '';
         const formatted = new Intl.NumberFormat('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(n);
         return (mon === 'USD' ? 'US$ ' : '$ ') + formatted;
+    }
+
+    isOnOffer(p: Product): boolean {
+        return !!p.is_offer && p.offer_price !== null && p.offer_price !== undefined;
+    }
+
+    /** % de descuento (entero) de la oferta respecto del precio de lista. */
+    offerPct(p: Product): number {
+        const list = Number(p.price ?? 0);
+        const off = Number(p.offer_price ?? 0);
+        if (!list || off <= 0 || off >= list) return 0;
+        return Math.round((1 - off / list) * 100);
     }
 
     fmtPriceShort(p: number | null): string {

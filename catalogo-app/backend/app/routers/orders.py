@@ -63,7 +63,12 @@ def _build_order_items(db: Session, items_in: list, condition: PaymentCondition 
                 f'Producto "{product.name}" no tiene precio cargado (consultar al proveedor)',
             )
         qty = max(1, int(it.quantity))
-        unit_list = Decimal(product.price)
+        # Si el producto está en oferta, el precio de oferta reemplaza al de lista
+        # como base; la condición de pago (multiplicador) se aplica sobre esa base.
+        if product.is_offer and product.offer_price is not None:
+            unit_list = Decimal(product.offer_price)
+        else:
+            unit_list = Decimal(product.price)
         unit_final = _quantize(unit_list * multiplier)
         line_total = _quantize(unit_final * qty)
         sub_line = _quantize(unit_list * qty)

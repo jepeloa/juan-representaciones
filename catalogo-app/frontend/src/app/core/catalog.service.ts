@@ -12,6 +12,7 @@ export interface ProductQuery {
     currency?: string;
     max_price?: number;
     min_price?: number;
+    on_offer?: boolean;
     sort?: string;
     page?: number;
     page_size?: number;

@@ -46,4 +46,18 @@ export class ProductDetailModalComponent {
         const fmt = new Intl.NumberFormat('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(n);
         return (mon === 'USD' ? 'US$ ' : '$ ') + fmt;
     }
+
+    get onOffer(): boolean {
+        const p = this.product;
+        return !!p && !!p.is_offer && p.offer_price !== null && p.offer_price !== undefined;
+    }
+
+    get offerPct(): number {
+        const p = this.product;
+        if (!p) return 0;
+        const list = Number(p.price ?? 0);
+        const off = Number(p.offer_price ?? 0);
+        if (!list || off <= 0 || off >= list) return 0;
+        return Math.round((1 - off / list) * 100);
+    }
 }

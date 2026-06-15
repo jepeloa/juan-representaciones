@@ -16,12 +16,15 @@ router = APIRouter(prefix='/api/products', tags=['products'])
 
 def _row_to_out(product: Product) -> ProductOut:
     thumb = product.images[0].src if product.images else None
+    on_offer = bool(product.is_offer and product.offer_price is not None)
     return ProductOut(
         id=product.id,
         code=product.code,
         name=product.name,
         description=product.description,
         price=product.price,
+        offer_price=product.offer_price if on_offer else None,
+        is_offer=on_offer,
         currency=product.currency,
         iva=product.iva,
         supplier_id=product.supplier_id,
@@ -44,6 +47,7 @@ def list_products(
     currency: str | None = None,
     max_price: Decimal | None = None,
     min_price: Decimal | None = None,
+    on_offer: bool | None = Query(None, description='Si es true, solo productos en oferta activa'),
     sort: str = Query('name', pattern='^(relevance|name|price|code|supplier|category|-name|-price|-code|-supplier|-category)$'),
     page: int = Query(1, ge=1),
     page_size: int = Query(60, ge=1, le=200),
@@ -66,6 +70,8 @@ def list_products(
         stmt = stmt.where(Product.price <= max_price)
     if min_price is not None:
         stmt = stmt.where(Product.price >= min_price)
+    if on_offer:
+        stmt = stmt.where(Product.is_offer.is_(True), Product.offer_price.is_not(None))
     key = sort.lstrip('-')
     desc = sort.startswith('-')
 

@@ -31,6 +31,8 @@ export interface Product {
     name: string;
     description: string | null;
     price: number | string | null;
+    offer_price: number | string | null;
+    is_offer: boolean;
     currency: string | null;
     iva: string | null;
     supplier_id: number;

@@ -137,10 +137,16 @@
                         <td class="py-2 px-3 text-slate-500 max-w-[200px] truncate hidden lg:table-cell" [title]="p.category_name || ''">{{ p.category_name }}</td>
                         <td class="py-2 px-3 text-slate-500 font-mono text-xs hidden lg:table-cell">{{ p.code }}</td>
                         <td class="py-2 px-3 font-medium text-slate-700 max-w-md truncate" [title]="p.name">{{ p.name }}</td>
-                        <td class="py-2 px-3 text-right font-semibold tabular-nums"
-                            [class.text-sage-700]="p.currency === 'ARS'"
-                            [class.text-brand-700]="p.currency === 'USD'">
-                            {{ fmtPrice(p.price, p.currency) || '—' }}
+                        <td class="py-2 px-3 text-right tabular-nums">
+                            <span *ngIf="isOnOffer(p)" class="block text-xs text-slate-400 line-through leading-none">
+                                {{ fmtPrice(p.price, p.currency) }}
+                            </span>
+                            <span class="font-semibold"
+                                  [class.text-blush-600]="isOnOffer(p)"
+                                  [class.text-sage-700]="!isOnOffer(p) && p.currency === 'ARS'"
+                                  [class.text-brand-700]="!isOnOffer(p) && p.currency === 'USD'">
+                                {{ (isOnOffer(p) ? fmtPrice(p.offer_price, p.currency) : fmtPrice(p.price, p.currency)) || '—' }}
+                            </span>
                         </td>
                         <td class="py-2 px-3">
                             <span *ngIf="p.currency" class="badge"
@@ -192,10 +198,14 @@
                 </p>
                 <h3 class="text-sm font-semibold text-slate-800 leading-tight line-clamp-2 mt-1">{{ p.name }}</h3>
                 <div class="flex items-baseline gap-2 mt-1">
+                    <span *ngIf="isOnOffer(p)" class="text-xs text-slate-400 line-through tabular-nums">
+                        {{ fmtPrice(p.price, p.currency) }}
+                    </span>
                     <span class="text-base font-bold tabular-nums"
-                          [class.text-sage-700]="p.currency === 'ARS'"
-                          [class.text-brand-700]="p.currency === 'USD'">
-                        {{ p.price !== null ? fmtPrice(p.price, p.currency) : '' }}
+                          [class.text-blush-600]="isOnOffer(p)"
+                          [class.text-sage-700]="!isOnOffer(p) && p.currency === 'ARS'"
+                          [class.text-brand-700]="!isOnOffer(p) && p.currency === 'USD'">
+                        {{ p.price !== null ? fmtPrice(isOnOffer(p) ? p.offer_price : p.price, p.currency) : '' }}
                     </span>
                     <span *ngIf="!p.currency || p.price === null" class="badge bg-blush-50 text-blush-500 text-[10px]">Consultar</span>
                 </div>
@@ -227,7 +237,11 @@
     <!-- GRID VIEW -->
     <div *ngIf="view() === 'grid'" class="grid gap-4 md:gap-5 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         <div *ngFor="let p of products()" class="card overflow-hidden flex flex-col cursor-pointer hover:shadow-lift transition" (click)="openDetail(p)">
-            <div class="aspect-square bg-cream-100 flex items-center justify-center overflow-hidden">
+            <div class="relative aspect-square bg-cream-100 flex items-center justify-center overflow-hidden">
+                <span *ngIf="isOnOffer(p)"
+                      class="absolute top-2 left-2 z-10 inline-flex items-center rounded-full bg-blush-500 text-white text-xs font-bold px-2 py-0.5 shadow-soft">
+                    {{ offerPct(p) > 0 ? '-' + offerPct(p) + '%' : 'OFERTA' }}
+                </span>
                 <img *ngIf="p.thumbnail; else noimgcard" [src]="p.thumbnail" loading="lazy" class="w-full h-full object-cover" alt=""/>
                 <ng-template #noimgcard>
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-12 h-12 text-cream-300">
@@ -242,11 +256,17 @@
                 <h3 class="font-semibold text-slate-700 leading-snug line-clamp-2" [title]="p.name">{{ p.name }}</h3>
                 <p *ngIf="p.code" class="text-xs text-slate-500 font-mono">{{ p.code }}</p>
                 <div class="mt-auto pt-2 flex items-center justify-between gap-2">
-                    <span *ngIf="p.price !== null; else noprice" class="text-base font-bold"
-                          [class.text-sage-700]="p.currency === 'ARS'"
-                          [class.text-brand-700]="p.currency === 'USD'">
-                        {{ fmtPrice(p.price, p.currency) }}
-                    </span>
+                    <div *ngIf="p.price !== null; else noprice" class="min-w-0">
+                        <span *ngIf="isOnOffer(p)" class="block text-xs text-slate-400 line-through leading-none">
+                            {{ fmtPrice(p.price, p.currency) }}
+                        </span>
+                        <span class="text-base font-bold"
+                              [class.text-blush-600]="isOnOffer(p)"
+                              [class.text-sage-700]="!isOnOffer(p) && p.currency === 'ARS'"
+                              [class.text-brand-700]="!isOnOffer(p) && p.currency === 'USD'">
+                            {{ fmtPrice(isOnOffer(p) ? p.offer_price : p.price, p.currency) }}
+                        </span>
+                    </div>
                     <ng-template #noprice><span class="badge bg-blush-50 text-blush-500">Consultar</span></ng-template>
                     <ng-container *ngIf="p.price !== null">
                         <button *ngIf="!cart.has(p.id); else inCartGrid" (click)="addToCart(p, $event)"
@@ -286,3 +306,41 @@
     [product]="selectedProduct()"
     (close)="closeDetail()">
 </app-product-detail-modal>
+
+<!-- Popup de ofertas del día -->
+<div *ngIf="showOffersPopup()"
+     class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm"
+     (click)="closeOffersPopup()">
+    <div class="card max-w-lg w-full overflow-hidden animate-[fadeIn_.2s_ease]" (click)="$event.stopPropagation()">
+        <div class="relative bg-blush-500 text-white px-5 py-4">
+            <h3 class="font-display text-lg md:text-xl font-bold">🔥 Ofertas del día</h3>
+            <p class="text-sm text-white/90">Aprovechá los productos con descuento de hoy.</p>
+            <button (click)="closeOffersPopup()" aria-label="Cerrar"
+                    class="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <div class="p-4 grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[50vh] overflow-y-auto">
+            <button *ngFor="let p of offerPreview()" (click)="goToOffers()"
+                    class="text-left rounded-lg border border-cream-200 overflow-hidden hover:shadow-soft transition">
+                <div class="relative aspect-square bg-cream-100">
+                    <span class="absolute top-1.5 left-1.5 inline-flex items-center rounded-full bg-blush-500 text-white text-[10px] font-bold px-1.5 py-0.5">
+                        {{ offerPct(p) > 0 ? '-' + offerPct(p) + '%' : 'OFERTA' }}
+                    </span>
+                    <img *ngIf="p.thumbnail" [src]="p.thumbnail" loading="lazy" class="w-full h-full object-cover"/>
+                </div>
+                <div class="p-2">
+                    <p class="text-xs font-semibold text-slate-700 line-clamp-2 leading-tight">{{ p.name }}</p>
+                    <p class="text-xs text-slate-400 line-through leading-none mt-1">{{ fmtPrice(p.price, p.currency) }}</p>
+                    <p class="text-sm font-bold text-blush-600">{{ fmtPrice(p.offer_price, p.currency) }}</p>
+                </div>
+            </button>
+        </div>
+        <div class="flex justify-end gap-2 p-4 border-t border-cream-200 bg-cream-50">
+            <button class="btn-ghost" (click)="closeOffersPopup()">Ahora no</button>
+            <button class="btn-primary" (click)="goToOffers()">Ver todas las ofertas →</button>
+        </div>
+    </div>
+</div>

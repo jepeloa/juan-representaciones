@@ -1,5 +1,5 @@
 from decimal import Decimal
-from sqlalchemy import String, Text, ForeignKey, Numeric, Integer, Index, Table, Column
+from sqlalchemy import String, Text, ForeignKey, Numeric, Integer, Boolean, Index, Table, Column
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -30,6 +30,10 @@ class Product(Base):
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     price: Mapped[Decimal | None] = mapped_column(Numeric(14, 2), nullable=True, index=True)
+    # Oferta: precio rebajado fijo + interruptor manual. Está "en oferta" cuando
+    # is_offer es True y offer_price no es None.
+    offer_price: Mapped[Decimal | None] = mapped_column(Numeric(14, 2), nullable=True)
+    is_offer: Mapped[bool] = mapped_column(Boolean, default=False, server_default='0', index=True)
     currency: Mapped[str | None] = mapped_column(String(8), nullable=True, index=True)
     iva: Mapped[str | None] = mapped_column(String(40), nullable=True)
     unit_per_pack: Mapped[int | None] = mapped_column(Integer, nullable=True)

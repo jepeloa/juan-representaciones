@@ -80,11 +80,19 @@
                         <button class="w-10 h-10 rounded-md border border-cream-200 hover:bg-cream-100 text-slate-600 text-lg font-medium"
                                 (click)="cart.update(it.product.id, it.quantity + 1)" aria-label="Sumar">+</button>
                     </div>
-                    <p class="font-bold tabular-nums text-base sm:text-lg"
-                       [class.text-sage-700]="it.product.currency === 'ARS'"
-                       [class.text-brand-700]="it.product.currency === 'USD'">
-                        {{ fmtPrice(+(it.product.price || 0) * it.quantity, it.product.currency || 'ARS') }}
-                    </p>
+                    <div class="text-right">
+                        <span *ngIf="it.product.is_offer && it.product.offer_price != null"
+                              class="badge bg-blush-100 text-blush-600 mb-0.5">Oferta</span>
+                        <p *ngIf="it.product.is_offer && it.product.offer_price != null"
+                           class="text-[11px] text-slate-400 line-through tabular-nums leading-none">
+                            {{ fmtPrice(+(it.product.price || 0) * it.quantity, it.product.currency || 'ARS') }}
+                        </p>
+                        <p class="font-bold tabular-nums text-base sm:text-lg"
+                           [class.text-sage-700]="it.product.currency === 'ARS'"
+                           [class.text-brand-700]="it.product.currency === 'USD'">
+                            {{ fmtPrice(effPrice(it.product) * it.quantity, it.product.currency || 'ARS') }}
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>

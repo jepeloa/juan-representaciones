@@ -36,10 +36,18 @@ export class CartPage implements OnInit {
         return (p.payment_conditions ?? []).map(c => c.name).join(', ');
     }
 
+    /** Precio efectivo: el de oferta si el producto está en oferta, si no el de lista. */
+    effPrice(p: Product): number {
+        if (p.is_offer && p.offer_price !== null && p.offer_price !== undefined) {
+            return Number(p.offer_price);
+        }
+        return Number(p.price ?? 0);
+    }
+
     subtotalsByCurrency = computed(() => {
         const out: Record<string, number> = { ARS: 0, USD: 0 };
         for (const it of this.cart.items()) {
-            const price = Number(it.product.price ?? 0);
+            const price = this.effPrice(it.product);
             const cur = it.product.currency || 'ARS';
             out[cur] = (out[cur] || 0) + price * it.quantity;
         }

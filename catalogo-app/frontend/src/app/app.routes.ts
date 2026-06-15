@@ -18,12 +18,21 @@ export const routes: Routes = [
                 loadComponent: () => import('./pages/catalog/catalog.page').then(m => m.CatalogPage),
             },
             {
+                path: 'ofertas',
+                loadComponent: () => import('./pages/offers/offers.page').then(m => m.OffersPage),
+            },
+            {
                 path: 'proveedores',
                 loadComponent: () => import('./pages/suppliers/suppliers.page').then(m => m.SuppliersPage),
             },
             {
                 path: 'carrito',
                 loadComponent: () => import('./pages/cart/cart.page').then(m => m.CartPage),
+            },
+            {
+                path: 'admin/ofertas',
+                canActivate: [adminGuard],
+                loadComponent: () => import('./pages/admin-offers/admin-offers.page').then(m => m.AdminOffersPage),
             },
             {
                 path: 'admin/condiciones',

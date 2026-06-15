@@ -1,0 +1,96 @@
+<div class="p-3 md:p-6 max-w-5xl mx-auto space-y-4 md:space-y-6">
+    <div>
+        <h2 class="font-display text-xl md:text-2xl font-bold text-slate-800">Ofertas</h2>
+        <p class="text-xs md:text-sm text-slate-500">Elegí productos, cargá su precio de oferta y activá/pausá las que quieras mostrar en el catálogo.</p>
+    </div>
+
+    <div *ngIf="successMsg()" class="rounded-lg bg-sage-50 border border-sage-200 px-4 py-3 text-sm text-sage-700">
+        ✓ {{ successMsg() }}
+    </div>
+    <div *ngIf="error()" class="rounded-lg bg-blush-50 border border-blush-200 px-4 py-3 text-sm text-blush-500">
+        {{ error() }}
+    </div>
+
+    <!-- Buscador para agregar -->
+    <div class="card p-4 md:p-5 space-y-3">
+        <h3 class="font-display text-lg font-semibold text-slate-800">Agregar producto a oferta</h3>
+        <input class="input" [(ngModel)]="q" (ngModelChange)="onSearchInput()" name="q"
+               placeholder="Buscar producto por nombre, código o descripción…"/>
+
+        <div *ngIf="searching()" class="text-sm text-slate-400 py-2">Buscando…</div>
+
+        <div *ngIf="searchResults().length" class="divide-y divide-cream-100 border border-cream-200 rounded-lg overflow-hidden">
+            <div *ngFor="let p of searchResults()" class="flex items-center gap-3 p-3 hover:bg-cream-50">
+                <div class="w-12 h-12 rounded-md bg-cream-100 overflow-hidden flex-shrink-0">
+                    <img *ngIf="p.thumbnail" [src]="p.thumbnail" class="w-full h-full object-cover"/>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-semibold text-slate-800 truncate">{{ p.name }}</p>
+                    <p class="text-xs text-slate-500">
+                        {{ p.supplier_name }} · Lista: <b>{{ fmtPrice(p.price, p.currency) }}</b>
+                    </p>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                    <input class="input w-32 text-right" type="text" inputmode="decimal"
+                           [(ngModel)]="priceInput[p.id]" [name]="'np' + p.id" placeholder="Precio oferta"/>
+                    <span *ngIf="offerPct(p, priceInput[p.id]) > 0" class="badge bg-blush-100 text-blush-600 w-14 text-center">
+                        -{{ offerPct(p, priceInput[p.id]) }}%
+                    </span>
+                    <button class="btn-primary text-sm whitespace-nowrap" (click)="addOffer(p)">Poner en oferta</button>
+                </div>
+            </div>
+        </div>
+        <p *ngIf="q && !searching() && !searchResults().length" class="text-sm text-slate-400 py-2">
+            Sin resultados nuevos para “{{ q }}”.
+        </p>
+    </div>
+
+    <!-- Ofertas actuales -->
+    <div class="card overflow-hidden">
+        <div class="p-4 border-b border-cream-200 bg-cream-50">
+            <h3 class="font-display text-lg font-semibold text-slate-800">Ofertas cargadas ({{ offers().length }})</h3>
+        </div>
+
+        <div *ngIf="loading()" class="py-10 text-center text-slate-400 text-sm">Cargando…</div>
+
+        <div *ngIf="!loading()" class="divide-y divide-cream-100">
+            <div *ngFor="let p of offers()" class="flex flex-wrap items-center gap-3 p-3 md:p-4"
+                 [class.opacity-60]="!p.is_offer">
+                <div class="w-12 h-12 rounded-md bg-cream-100 overflow-hidden flex-shrink-0">
+                    <img *ngIf="p.thumbnail" [src]="p.thumbnail" class="w-full h-full object-cover"/>
+                </div>
+                <div class="flex-1 min-w-[140px]">
+                    <p class="text-sm font-semibold text-slate-800 truncate" [title]="p.name">{{ p.name }}</p>
+                    <p class="text-xs text-slate-500">
+                        {{ p.supplier_name }} · Lista: <span class="line-through">{{ fmtPrice(p.price, p.currency) }}</span>
+                    </p>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <input class="input w-32 text-right" type="text" inputmode="decimal"
+                           [(ngModel)]="priceInput[p.id]" [name]="'ep' + p.id"/>
+                    <span *ngIf="offerPct(p, priceInput[p.id]) > 0" class="badge bg-blush-100 text-blush-600 w-14 text-center">
+                        -{{ offerPct(p, priceInput[p.id]) }}%
+                    </span>
+                    <button class="btn-ghost text-xs" (click)="updatePrice(p)">Guardar</button>
+                </div>
+
+                <div class="flex items-center gap-2 ml-auto">
+                    <span class="badge"
+                          [class.bg-sage-100]="p.is_offer" [class.text-sage-700]="p.is_offer"
+                          [class.bg-beige-100]="!p.is_offer" [class.text-beige-700]="!p.is_offer">
+                        {{ p.is_offer ? 'Activa' : 'Pausada' }}
+                    </span>
+                    <button class="btn-ghost text-xs" (click)="toggleActive(p)">
+                        {{ p.is_offer ? 'Pausar' : 'Activar' }}
+                    </button>
+                    <button class="btn-ghost text-xs text-blush-500 hover:bg-blush-50" (click)="removeOffer(p)">Quitar</button>
+                </div>
+            </div>
+
+            <div *ngIf="!offers().length" class="py-10 text-center text-slate-400 text-sm">
+                Todavía no hay ofertas. Buscá un producto arriba para agregar la primera.
+            </div>
+        </div>
+    </div>
+</div>
