@@ -1,6 +1,15 @@
-import { Routes } from '@angular/router';
+import { inject } from '@angular/core';
+import { Routes, Router } from '@angular/router';
 import { authGuard } from './core/auth.guard';
 import { adminGuard } from './core/admin.guard';
+import { AuthService } from './core/auth.service';
+
+/** Landing por rol: cliente → Marcas, admin → Productos. */
+const homeRedirect = () => {
+    const auth = inject(AuthService);
+    const router = inject(Router);
+    return router.createUrlTree([auth.user()?.is_admin ? '/catalogo' : '/proveedores']);
+};
 
 export const routes: Routes = [
     {
@@ -12,7 +21,7 @@ export const routes: Routes = [
         loadComponent: () => import('./layout/shell/shell.component').then(m => m.ShellComponent),
         canActivate: [authGuard],
         children: [
-            { path: '', pathMatch: 'full', redirectTo: 'catalogo' },
+            { path: '', pathMatch: 'full', canActivate: [homeRedirect], children: [] },
             {
                 path: 'catalogo',
                 loadComponent: () => import('./pages/catalog/catalog.page').then(m => m.CatalogPage),

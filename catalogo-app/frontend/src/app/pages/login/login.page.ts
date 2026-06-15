@@ -18,7 +18,12 @@ export class LoginPage {
     error = signal<string | null>(null);
 
     constructor(private auth: AuthService, private router: Router) {
-        if (this.auth.isAuthenticated()) this.router.navigate(['/catalogo']);
+        if (this.auth.isAuthenticated()) this.router.navigate([this.home()]);
+    }
+
+    /** Cliente arranca en Marcas; admin en Productos. */
+    private home(): string {
+        return this.auth.user()?.is_admin ? '/catalogo' : '/proveedores';
     }
 
     submit() {
@@ -28,7 +33,7 @@ export class LoginPage {
         this.auth.login(this.username.trim(), this.password).subscribe({
             next: () => {
                 this.loading.set(false);
-                this.router.navigate(['/catalogo']);
+                this.router.navigate([this.home()]);
             },
             error: err => {
                 this.loading.set(false);
