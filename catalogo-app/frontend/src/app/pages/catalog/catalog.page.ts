@@ -34,7 +34,7 @@ export class CatalogPage implements OnInit {
     sort = 'name';
     page = 1;
     pageSize = 60;
-    view = signal<ViewMode>('table');
+    view = signal<ViewMode>('grid');
 
     priceSlider = 100;
     maxPriceLimit = 5_000_000;
@@ -69,9 +69,8 @@ export class CatalogPage implements OnInit {
         this.supplierId = qp.get('supplier') ? Number(qp.get('supplier')) : null;
         this.categoryId = qp.get('cat') ? Number(qp.get('cat')) : null;
         this.currency = qp.get('mon') ?? '';
-        // Clients always see grid; admins default to table unless they switched it
-        const defaultView: ViewMode = this.isAdmin ? 'table' : 'grid';
-        this.view.set(this.isAdmin ? ((qp.get('view') as ViewMode) || defaultView) : 'grid');
+        // Everyone defaults to grid; admins can switch to table (persisted via ?view=)
+        this.view.set(this.isAdmin ? ((qp.get('view') as ViewMode) || 'grid') : 'grid');
         this.page = Number(qp.get('page')) || 1;
 
         this.svc.facets().subscribe(f => {
@@ -203,7 +202,7 @@ export class CatalogPage implements OnInit {
         if (this.supplierId) qp.supplier = this.supplierId;
         if (this.categoryId) qp.cat = this.categoryId;
         if (this.currency) qp.mon = this.currency;
-        if (this.view() !== 'table') qp.view = this.view();
+        if (this.view() !== 'grid') qp.view = this.view();
         if (this.page > 1) qp.page = this.page;
         this.router.navigate([], { relativeTo: this.route, queryParams: qp, replaceUrl: true });
     }
