@@ -46,6 +46,12 @@ class ProductWriteIn(BaseModel):
     notes: str | None = None
 
 
+# ===== Marcas =====
+class SupplierConditionsIn(BaseModel):
+    """Condiciones de pago asociadas a una marca."""
+    condition_ids: list[int] = []
+
+
 # ===== Ofertas =====
 class OfferUpdateIn(BaseModel):
     """Set/actualizar la oferta de un producto.

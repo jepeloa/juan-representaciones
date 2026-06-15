@@ -21,13 +21,6 @@ def _cond_out(pc: PaymentCondition) -> PaymentConditionOut:
     )
 
 
-def _resolve_suppliers(db: Session, ids: list[int]) -> list[Supplier]:
-    if not ids:
-        return []
-    sups = db.execute(select(Supplier).where(Supplier.id.in_(ids))).scalars().all()
-    return list(sups)
-
-
 # ===== Payment conditions =====
 @router.get('/payment-conditions', response_model=list[PaymentConditionOut])
 def list_conditions(db: Session = Depends(get_db), _: User = Depends(require_admin)):
@@ -40,9 +33,8 @@ def list_conditions(db: Session = Depends(get_db), _: User = Depends(require_adm
 @router.post('/payment-conditions', response_model=PaymentConditionOut, status_code=status.HTTP_201_CREATED)
 def create_condition(body: PaymentConditionIn, db: Session = Depends(get_db), _: User = Depends(require_admin)):
     data = body.model_dump()
-    supplier_ids = data.pop('supplier_ids', [])
+    data.pop('supplier_ids', None)  # la asociación a marcas se gestiona desde Marcas
     pc = PaymentCondition(**data)
-    pc.suppliers = _resolve_suppliers(db, supplier_ids)
     db.add(pc)
     db.commit()
     db.refresh(pc)
@@ -55,10 +47,9 @@ def update_condition(cond_id: int, body: PaymentConditionIn, db: Session = Depen
     if not pc:
         raise HTTPException(status.HTTP_404_NOT_FOUND, 'Condición no encontrada')
     data = body.model_dump()
-    supplier_ids = data.pop('supplier_ids', [])
+    data.pop('supplier_ids', None)  # la asociación a marcas se gestiona desde Marcas
     for k, v in data.items():
         setattr(pc, k, v)
-    pc.suppliers = _resolve_suppliers(db, supplier_ids)
     db.commit()
     db.refresh(pc)
     return _cond_out(pc)

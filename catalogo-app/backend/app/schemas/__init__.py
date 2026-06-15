@@ -5,6 +5,7 @@ from app.schemas.product import (
 )
 from app.schemas.admin import (
     UserCreateIn, UserUpdateIn, UserAdminOut, ProductWriteIn, OfferUpdateIn,
+    SupplierConditionsIn,
 )
 from app.schemas.orders import (
     PaymentConditionIn, PaymentConditionOut,
@@ -17,6 +18,7 @@ __all__ = [
     'ProductOut', 'ProductDetailOut', 'ProductImageOut', 'PaymentConditionBrief',
     'SupplierOut', 'CategoryOut', 'ProductListOut', 'FacetsOut',
     'UserCreateIn', 'UserUpdateIn', 'UserAdminOut', 'ProductWriteIn', 'OfferUpdateIn',
+    'SupplierConditionsIn',
     'PaymentConditionIn', 'PaymentConditionOut',
     'SettingIn', 'SettingsBulkIn', 'SettingsOut',
     'OrderItemIn', 'OrderItemOut', 'OrderCreateIn', 'OrderOut',

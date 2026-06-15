@@ -4,7 +4,7 @@ import { RouterLink } from '@angular/router';
 
 import { CatalogService } from '../../core/catalog.service';
 import { AuthService } from '../../core/auth.service';
-import { AdminService } from '../../core/admin.service';
+import { AdminService, AdminPaymentCondition } from '../../core/admin.service';
 import { Supplier } from '../../core/models';
 
 @Component({
@@ -18,8 +18,14 @@ export class SuppliersPage implements OnInit {
     loading = signal(true);
     uploadingId = signal<number | null>(null);
 
-    // Modal de condiciones de pago de una marca
+    // Modal de condiciones de pago de una marca (cliente: ver)
     conditionsOf = signal<Supplier | null>(null);
+
+    // Editor de condiciones por marca (admin)
+    allConditions = signal<AdminPaymentCondition[]>([]);
+    editCondsOf = signal<Supplier | null>(null);
+    selectedCondIds: number[] = [];
+    savingConds = signal(false);
 
     constructor(private svc: CatalogService, public auth: AuthService, private admin: AdminService) {}
 
@@ -29,6 +35,42 @@ export class SuppliersPage implements OnInit {
 
     ngOnInit() {
         this.load();
+        if (this.isAdmin) this.admin.listConditions().subscribe(c => this.allConditions.set(c));
+    }
+
+    openEditConds(s: Supplier, ev: Event) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        this.editCondsOf.set(s);
+        this.selectedCondIds = (s.payment_conditions ?? []).map(c => c.id);
+    }
+
+    isCondSelected(id: number): boolean {
+        return this.selectedCondIds.includes(id);
+    }
+
+    toggleCond(id: number) {
+        this.selectedCondIds = this.selectedCondIds.includes(id)
+            ? this.selectedCondIds.filter(x => x !== id)
+            : [...this.selectedCondIds, id];
+    }
+
+    saveConds() {
+        const s = this.editCondsOf();
+        if (!s) return;
+        this.savingConds.set(true);
+        this.admin.setSupplierConditions(s.id, this.selectedCondIds).subscribe({
+            next: updated => {
+                this.suppliers.update(list => list.map(x => x.id === updated.id ? { ...x, payment_conditions: updated.payment_conditions } : x));
+                this.savingConds.set(false);
+                this.editCondsOf.set(null);
+            },
+            error: () => this.savingConds.set(false),
+        });
+    }
+
+    closeEditConds() {
+        this.editCondsOf.set(null);
     }
 
     private load() {

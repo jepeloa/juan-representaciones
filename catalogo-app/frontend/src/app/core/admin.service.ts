@@ -124,6 +124,9 @@ export class AdminService {
     clearSupplierImage(supplierId: number): Observable<Supplier> {
         return this.http.delete<Supplier>(`${API_BASE}/admin/suppliers/${supplierId}/image`);
     }
+    setSupplierConditions(supplierId: number, conditionIds: number[]): Observable<Supplier> {
+        return this.http.put<Supplier>(`${API_BASE}/admin/suppliers/${supplierId}/conditions`, { condition_ids: conditionIds });
+    }
 
     // ===== Settings =====
     getSettings(): Observable<AdminSettings> {
