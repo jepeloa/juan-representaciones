@@ -8,7 +8,7 @@
         <div *ngFor="let s of suppliers()" class="card overflow-hidden flex flex-col hover:shadow-lift transition group">
             <a [routerLink]="['/catalogo']" [queryParams]="{ supplier: s.id }" class="block">
                 <div class="aspect-[4/3] bg-cream-100 flex items-center justify-center overflow-hidden">
-                    <img *ngIf="s.image; else noimg" [src]="s.image" loading="lazy" class="w-full h-full object-contain p-3" alt=""/>
+                    <img *ngIf="s.image; else noimg" [src]="s.image" loading="lazy" class="w-full h-full object-cover" alt=""/>
                     <ng-template #noimg>
                         <span class="text-5xl font-bold text-brand-200 uppercase">{{ s.name[0] }}</span>
                     </ng-template>
