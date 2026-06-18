@@ -43,6 +43,8 @@
                     <button class="btn-outline text-xs" (click)="openEditConds(s, $event)">
                         Condiciones ({{ s.payment_conditions.length }})
                     </button>
+                    <button class="btn-ghost text-xs" (click)="renameSupplier(s, $event)">Renombrar</button>
+                    <button class="btn-ghost text-xs text-blush-500 hover:bg-blush-50" (click)="deleteSupplier(s, $event)">Eliminar</button>
                 </div>
             </div>
         </div>

@@ -127,6 +127,12 @@ export class AdminService {
     setSupplierConditions(supplierId: number, conditionIds: number[]): Observable<Supplier> {
         return this.http.put<Supplier>(`${API_BASE}/admin/suppliers/${supplierId}/conditions`, { condition_ids: conditionIds });
     }
+    renameSupplier(supplierId: number, name: string): Observable<Supplier> {
+        return this.http.patch<Supplier>(`${API_BASE}/admin/suppliers/${supplierId}`, { name });
+    }
+    deleteSupplier(supplierId: number): Observable<void> {
+        return this.http.delete<void>(`${API_BASE}/admin/suppliers/${supplierId}`);
+    }
 
     // ===== Settings =====
     getSettings(): Observable<AdminSettings> {

@@ -52,6 +52,11 @@ class SupplierConditionsIn(BaseModel):
     condition_ids: list[int] = []
 
 
+class SupplierUpdateIn(BaseModel):
+    """Renombrar una marca."""
+    name: str = Field(min_length=1, max_length=120)
+
+
 # ===== Ofertas =====
 class OfferUpdateIn(BaseModel):
     """Set/actualizar la oferta de un producto.

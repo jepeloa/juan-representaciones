@@ -6,10 +6,53 @@ from sqlalchemy.orm import Session
 from app.auth.deps import require_admin
 from app.database import get_db
 from app.models import Supplier, Product, PaymentCondition, User
-from app.schemas import SupplierOut, PaymentConditionBrief, SupplierConditionsIn
+from app.schemas import SupplierOut, PaymentConditionBrief, SupplierConditionsIn, SupplierUpdateIn
 from app.routers.admin_products import _save_image_file
 
 router = APIRouter(prefix='/api/admin/suppliers', tags=['admin-suppliers'])
+
+
+@router.patch('/{supplier_id}', response_model=SupplierOut)
+def update_supplier(
+    supplier_id: int,
+    body: SupplierUpdateIn,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_admin),
+):
+    sup = db.get(Supplier, supplier_id)
+    if not sup:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, 'Marca no encontrada')
+    name = body.name.strip()
+    dup = db.execute(
+        select(Supplier).where(Supplier.name == name, Supplier.id != supplier_id)
+    ).scalar_one_or_none()
+    if dup:
+        raise HTTPException(status.HTTP_409_CONFLICT, f'Ya existe una marca llamada "{name}"')
+    sup.name = name
+    db.commit()
+    db.refresh(sup)
+    return _out(db, sup)
+
+
+@router.delete('/{supplier_id}', status_code=status.HTTP_204_NO_CONTENT)
+def delete_supplier(
+    supplier_id: int,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_admin),
+):
+    sup = db.get(Supplier, supplier_id)
+    if not sup:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, 'Marca no encontrada')
+    cnt = db.execute(
+        select(func.count(Product.id)).where(Product.supplier_id == supplier_id)
+    ).scalar_one()
+    if cnt > 0:
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST,
+            f'La marca tiene {cnt} producto(s). Reasigná o eliminá esos productos antes de borrar la marca.',
+        )
+    db.delete(sup)
+    db.commit()
 
 
 def _out(db: Session, sup: Supplier) -> SupplierOut:

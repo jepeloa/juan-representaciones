@@ -105,6 +105,27 @@ export class SuppliersPage implements OnInit {
         this.conditionsOf.set(null);
     }
 
+    renameSupplier(supplier: Supplier, ev: Event) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        const nuevo = prompt('Nuevo nombre de la marca:', supplier.name);
+        if (!nuevo || !nuevo.trim() || nuevo.trim() === supplier.name) return;
+        this.admin.renameSupplier(supplier.id, nuevo.trim()).subscribe({
+            next: updated => this.suppliers.update(list => list.map(s => s.id === updated.id ? { ...s, name: updated.name } : s)),
+            error: err => alert(err?.error?.detail || 'No se pudo renombrar la marca'),
+        });
+    }
+
+    deleteSupplier(supplier: Supplier, ev: Event) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        if (!confirm(`¿Eliminar la marca "${supplier.name}"?`)) return;
+        this.admin.deleteSupplier(supplier.id).subscribe({
+            next: () => this.suppliers.update(list => list.filter(s => s.id !== supplier.id)),
+            error: err => alert(err?.error?.detail || 'No se pudo eliminar la marca'),
+        });
+    }
+
     clearImage(supplier: Supplier, ev: Event) {
         ev.preventDefault();
         ev.stopPropagation();
