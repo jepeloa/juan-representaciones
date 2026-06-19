@@ -44,6 +44,11 @@ export const routes: Routes = [
                 loadComponent: () => import('./pages/admin-offers/admin-offers.page').then(m => m.AdminOffersPage),
             },
             {
+                path: 'admin/destacados',
+                canActivate: [adminGuard],
+                loadComponent: () => import('./pages/admin-featured/admin-featured.page').then(m => m.AdminFeaturedPage),
+            },
+            {
                 path: 'admin/condiciones',
                 canActivate: [adminGuard],
                 loadComponent: () => import('./pages/admin-conditions/admin-conditions.page').then(m => m.AdminConditionsPage),

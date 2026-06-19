@@ -34,6 +34,10 @@ class Product(Base):
     # is_offer es True y offer_price no es None.
     offer_price: Mapped[Decimal | None] = mapped_column(Numeric(14, 2), nullable=True)
     is_offer: Mapped[bool] = mapped_column(Boolean, default=False, server_default='0', index=True)
+    # Orden de destacados (NULL = no destacado). Menor = aparece primero.
+    # Separado por sección: catálogo y ofertas.
+    catalog_order: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    offer_order: Mapped[int | None] = mapped_column(Integer, nullable=True)
     currency: Mapped[str | None] = mapped_column(String(8), nullable=True, index=True)
     iva: Mapped[str | None] = mapped_column(String(40), nullable=True)
     unit_per_pack: Mapped[int | None] = mapped_column(Integer, nullable=True)

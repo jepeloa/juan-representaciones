@@ -114,13 +114,21 @@ def list_products(
             else_=1,                             # matcheó solo por descripción
         )
 
+    # Destacados primero (orden manual por sección): en ofertas usa offer_order,
+    # en catálogo usa catalog_order. Solo aplica al orden por defecto/relevancia;
+    # si el usuario elige un orden explícito (precio, código…), ese manda.
+    feature_col = Product.offer_order if on_offer else Product.catalog_order
+
     # Orden: por relevancia cuando hay búsqueda y el sort es el default ('name')
     # o explícito ('relevance'); en otro caso, por la columna pedida.
-    if relevance is not None and sort in ('name', 'relevance'):
-        stmt = stmt.order_by(relevance.desc(), Product.name.asc(), Product.id.asc())
+    if sort in ('name', 'relevance'):
+        # feature_col.is_(None) → False (destacados) ordena antes que True
+        clauses = [feature_col.is_(None), feature_col.asc()]
+        if relevance is not None:
+            clauses.append(relevance.desc())
+        clauses += [Product.name.asc(), Product.id.asc()]
+        stmt = stmt.order_by(*clauses)
     else:
-        if key == 'relevance':
-            key = 'name'  # sin búsqueda, 'relevance' no aplica
         sort_map = {
             'name': Product.name,
             'price': Product.price,

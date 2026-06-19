@@ -134,6 +134,14 @@ export class AdminService {
         return this.http.delete<void>(`${API_BASE}/admin/suppliers/${supplierId}`);
     }
 
+    // ===== Destacados (orden por sección) =====
+    getFeatured(section: 'catalog' | 'offer'): Observable<Product[]> {
+        return this.http.get<Product[]>(`${API_BASE}/admin/featured/${section}`);
+    }
+    setFeatured(section: 'catalog' | 'offer', productIds: number[]): Observable<Product[]> {
+        return this.http.put<Product[]>(`${API_BASE}/admin/featured/${section}`, { product_ids: productIds });
+    }
+
     // ===== Settings =====
     getSettings(): Observable<AdminSettings> {
         return this.http.get<AdminSettings>(`${API_BASE}/admin/settings`);
