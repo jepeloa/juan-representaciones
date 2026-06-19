@@ -16,7 +16,7 @@ def list_suppliers(db: Session = Depends(get_db), _: User = Depends(get_current_
         select(Supplier, func.count(Product.id).label('cnt'))
         .join(Product, Product.supplier_id == Supplier.id, isouter=True)
         .group_by(Supplier.id)
-        .order_by(Supplier.name)
+        .order_by(Supplier.sort_order.is_(None), Supplier.sort_order.asc(), Supplier.name)
     )
     return [
         SupplierOut(

@@ -141,6 +141,12 @@ export class AdminService {
     setFeatured(section: 'catalog' | 'offer', productIds: number[]): Observable<Product[]> {
         return this.http.put<Product[]>(`${API_BASE}/admin/featured/${section}`, { product_ids: productIds });
     }
+    getFeaturedBrands(): Observable<Supplier[]> {
+        return this.http.get<Supplier[]>(`${API_BASE}/admin/featured/brands`);
+    }
+    setFeaturedBrands(supplierIds: number[]): Observable<Supplier[]> {
+        return this.http.put<Supplier[]>(`${API_BASE}/admin/featured/brands`, { product_ids: supplierIds });
+    }
 
     // ===== Settings =====
     getSettings(): Observable<AdminSettings> {

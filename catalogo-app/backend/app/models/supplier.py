@@ -1,4 +1,4 @@
-from sqlalchemy import String, ForeignKey, Table, Column
+from sqlalchemy import String, Integer, ForeignKey, Table, Column
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -21,6 +21,8 @@ class Supplier(Base):
     slug: Mapped[str] = mapped_column(String(120), unique=True, index=True)
     # Foto/logo de la marca (ruta pública, ej. 'uploads/brands/xxx.jpg')
     image: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    # Orden de destacado de la marca (NULL = sin destacar). Menor = primero.
+    sort_order: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
     products: Mapped[list['Product']] = relationship(back_populates='supplier')  # noqa: F821
     payment_conditions: Mapped[list['PaymentCondition']] = relationship(  # noqa: F821
