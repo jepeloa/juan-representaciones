@@ -31,6 +31,11 @@ export class CatalogPage implements OnInit {
     offerPreview = signal<Product[]>([]);
     showOffersPopup = signal(false);
 
+    // Aviso de consulta de stock
+    showStock = signal(false);
+    readonly stockWhatsapp = 'https://wa.me/5493416747476?text=' +
+        encodeURIComponent('Hola, quería consultar disponibilidad de stock.');
+
     supplierId: number | null = null;
     categoryName: string | null = null;
     currency = '';
