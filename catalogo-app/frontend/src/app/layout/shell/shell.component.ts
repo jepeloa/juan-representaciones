@@ -55,7 +55,7 @@ export class ShellComponent {
         {
             label: 'Cargar productos',
             route: '/admin/productos',
-            icon: 'M12 4v16m-8-8h16',
+            icon: 'M3 6a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V6Zm10 2h-2v3H8v2h3v3h2v-3h3v-2h-3V8Z',
             adminOnly: true,
         },
         {
