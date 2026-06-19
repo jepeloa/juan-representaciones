@@ -42,6 +42,18 @@ def _quantize(d: Decimal) -> Decimal:
     return d.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
 
 
+def _brand_conditions(db: Session, order: Order) -> dict[str, list[str]]:
+    """Condiciones de pago (texto completo) por marca presente en la orden."""
+    names = {it.supplier_name for it in order.items if it.supplier_name}
+    if not names:
+        return {}
+    sups = db.execute(select(Supplier).where(Supplier.name.in_(names))).scalars().all()
+    return {
+        s.name: [(c.description or c.name) for c in s.payment_conditions if c.is_active]
+        for s in sups
+    }
+
+
 def _build_order_items(db: Session, items_in: list, condition: PaymentCondition | None) -> tuple[list[OrderItem], Decimal, Decimal, Decimal, Decimal]:
     multiplier = condition.multiplier if condition else Decimal('1.0000')
     out_items: list[OrderItem] = []
@@ -188,10 +200,11 @@ def order_pdf(
 
     settings_rows = db.execute(select(Setting)).scalars().all()
     settings = {s.key: s.value for s in settings_rows}
+    brand_conditions = _brand_conditions(db, order)
 
     from app.services.order_pdf import build_order_pdf
     buf = BytesIO()
-    build_order_pdf(buf, order=order, user=user, settings=settings)
+    build_order_pdf(buf, order=order, user=user, settings=settings, brand_conditions=brand_conditions)
     buf.seek(0)
     return StreamingResponse(
         buf,

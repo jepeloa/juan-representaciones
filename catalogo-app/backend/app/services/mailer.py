@@ -20,7 +20,7 @@ from sqlalchemy.orm import Session, selectinload
 
 from app.config import settings
 from app.database import SessionLocal
-from app.models import Order, Setting, User
+from app.models import Order, Setting, User, Supplier
 from app.services.order_pdf import build_order_pdf
 
 log = logging.getLogger('mailer')
@@ -96,9 +96,10 @@ def _render_html_body(order: Order, user: User, company: str) -> str:
 </body></html>"""
 
 
-def _build_pdf_bytes(order: Order, user: User, db_settings: dict[str, str | None]) -> bytes:
+def _build_pdf_bytes(order: Order, user: User, db_settings: dict[str, str | None],
+                     brand_conditions: dict[str, list[str]]) -> bytes:
     buf = BytesIO()
-    build_order_pdf(buf, order=order, user=user, settings=db_settings)
+    build_order_pdf(buf, order=order, user=user, settings=db_settings, brand_conditions=brand_conditions)
     return buf.getvalue()
 
 
@@ -143,8 +144,18 @@ def send_order_email(order_id: int) -> None:
             log.info('Order %s: would send to %s but SMTP_HOST is empty', order.id, recipient)
             return
 
+        # Condiciones por marca (texto completo)
+        names = {it.supplier_name for it in order.items if it.supplier_name}
+        brand_conditions: dict[str, list[str]] = {}
+        if names:
+            sups = db.execute(select(Supplier).where(Supplier.name.in_(names))).scalars().all()
+            brand_conditions = {
+                s.name: [(c.description or c.name) for c in s.payment_conditions if c.is_active]
+                for s in sups
+            }
+
         # Build PDF
-        pdf_bytes = _build_pdf_bytes(order, user, db_settings)
+        pdf_bytes = _build_pdf_bytes(order, user, db_settings, brand_conditions)
         html_body = _render_html_body(order, user, company)
 
         msg = EmailMessage()
