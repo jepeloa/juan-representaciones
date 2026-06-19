@@ -66,91 +66,68 @@
     <div class="flex-1 flex flex-col overflow-hidden">
         <!-- Top bar -->
         <header class="bg-white border-b border-cream-200 shrink-0 shadow-soft z-10">
-          <div class="flex items-center gap-3 px-3 md:px-6"
-               [class.h-14]="isAdmin" [class.md:h-16]="isAdmin"
-               [class.py-4]="!isAdmin" [class.md:py-5]="!isAdmin">
-            <button *ngIf="isAdmin" class="md:hidden p-2 -ml-1 rounded hover:bg-cream-100"
-                    (click)="toggleMobile()" aria-label="Abrir menú">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/>
-                </svg>
-            </button>
 
-            <!-- Logo: en mobile siempre; en desktop también para el cliente. Más grande para el cliente. -->
-            <div class="flex items-center shrink-0" [class.md:hidden]="isAdmin">
-                <img *ngIf="isAdmin" src="logo.png" alt="JMG" class="object-contain h-10"/>
-                <img *ngIf="!isAdmin" src="logo_login_trim.png" alt="JMG — Juan Manuel Garcia" class="object-contain w-auto h-16 md:h-24"/>
-            </div>
-
-            <h1 *ngIf="isAdmin" class="hidden md:block font-display text-base md:text-lg font-bold text-brand-900">Producto</h1>
-
-            <!-- Buscador global arriba (cliente) -->
-            <div *ngIf="!isAdmin" class="relative flex-1 max-w-2xl mx-auto">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke="currentColor" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
-                </svg>
-                <input type="text" class="input pl-11 h-11 md:h-12 text-base rounded-full"
-                       placeholder="Buscar producto, código…"
-                       [ngModel]="search.query()" (ngModelChange)="onSearch($event)"/>
-            </div>
-
-            <div class="flex-1" *ngIf="isAdmin"></div>
-
-            <!-- Cart shortcut (mobile, solo admin: el cliente tiene "Mi orden" en la botonera) -->
-            <a *ngIf="isAdmin" routerLink="/carrito"
-               class="md:hidden relative w-10 h-10 rounded-full flex items-center justify-center text-slate-600 hover:bg-cream-100">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke="currentColor" class="w-5 h-5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"/>
-                </svg>
-                <span *ngIf="cart.count() > 0"
-                      class="absolute -top-0.5 -right-0.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-brand-500 text-white text-[10px] font-bold border-2 border-white">
-                    {{ cart.count() }}
-                </span>
-            </a>
-
-            <!-- User menu -->
-            <div class="relative">
-                <button
-                    (click)="toggleUserMenu()"
-                    class="flex items-center gap-2 rounded-full pl-1 pr-2 md:pr-3 py-1 hover:bg-cream-100 transition"
-                >
-                    <div class="w-9 h-9 rounded-full bg-sage-100 text-sage-700 flex items-center justify-center font-semibold uppercase">
-                        {{ (auth.user()?.full_name || auth.user()?.username || '?')[0] }}
-                    </div>
-                    <span class="hidden md:inline text-sm font-medium text-slate-700">
-                        {{ auth.user()?.full_name || auth.user()?.username }}
-                    </span>
+            <!-- ADMIN: barra única -->
+            <div *ngIf="isAdmin" class="flex items-center gap-3 px-3 md:px-6 h-14 md:h-16">
+                <button class="md:hidden p-2 -ml-1 rounded hover:bg-cream-100"
+                        (click)="toggleMobile()" aria-label="Abrir menú">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/>
+                    </svg>
                 </button>
-                <div *ngIf="userMenuOpen()"
-                     class="absolute right-0 mt-2 w-56 rounded-lg bg-white shadow-lift border border-cream-200 py-1 z-50">
-                    <div class="px-4 py-2 border-b border-cream-200">
-                        <p class="text-sm font-semibold text-slate-800">{{ auth.user()?.full_name || auth.user()?.username }}</p>
-                        <p class="text-xs text-slate-500">{{ auth.user()?.is_admin ? 'Administrador' : 'Cliente' }}</p>
+                <div class="md:hidden flex items-center shrink-0">
+                    <img src="logo.png" alt="JMG" class="object-contain h-10"/>
+                </div>
+                <h1 class="hidden md:block font-display text-base md:text-lg font-bold text-brand-900">Producto</h1>
+                <div class="flex-1"></div>
+                <a routerLink="/carrito"
+                   class="md:hidden relative w-10 h-10 rounded-full flex items-center justify-center text-slate-600 hover:bg-cream-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"/>
+                    </svg>
+                    <span *ngIf="cart.count() > 0"
+                          class="absolute -top-0.5 -right-0.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-brand-500 text-white text-[10px] font-bold border-2 border-white">
+                        {{ cart.count() }}
+                    </span>
+                </a>
+                <ng-container [ngTemplateOutlet]="userMenu"></ng-container>
+            </div>
+
+            <!-- CLIENTE: logo centrado verticalmente junto a (buscador + usuario / botonera) -->
+            <div *ngIf="!isAdmin" class="flex items-center gap-3 md:gap-5 px-3 md:px-6 py-3 md:py-4">
+                <div class="flex items-center shrink-0">
+                    <img src="logo_login_trim.png" alt="JMG — Juan Manuel Garcia" class="object-contain w-auto h-16 md:h-24"/>
+                </div>
+                <div class="flex-1 min-w-0 flex flex-col gap-3">
+                    <div class="flex items-center gap-3">
+                        <div class="relative flex-1 max-w-2xl mx-auto">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke="currentColor" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
+                            </svg>
+                            <input type="text" class="input pl-11 h-11 md:h-12 text-base rounded-full"
+                                   placeholder="Buscar producto, código…"
+                                   [ngModel]="search.query()" (ngModelChange)="onSearch($event)"/>
+                        </div>
+                        <ng-container [ngTemplateOutlet]="userMenu"></ng-container>
                     </div>
-                    <button (click)="logout()" class="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-cream-50">
-                        Cerrar sesión
-                    </button>
+                    <nav class="flex items-center justify-center gap-1 overflow-x-auto">
+                        <a *ngFor="let item of nav()"
+                           [routerLink]="item.route"
+                           routerLinkActive="bg-brand-50 text-brand-700 font-semibold"
+                           [routerLinkActiveOptions]="{exact: false}"
+                           class="group flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-cream-100 hover:text-slate-800 transition whitespace-nowrap">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 shrink-0">
+                                <path [attr.d]="item.icon"/>
+                            </svg>
+                            <span>{{ item.label }}</span>
+                            <span *ngIf="item.showBadge && cart.count() > 0"
+                                  class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-brand-500 text-white text-xs font-bold">
+                                {{ cart.count() }}
+                            </span>
+                        </a>
+                    </nav>
                 </div>
             </div>
-          </div>
-
-          <!-- Fila 2: botonera de navegación (cliente), debajo del buscador -->
-          <nav *ngIf="!isAdmin" class="flex items-center justify-center gap-1 px-3 md:px-6 pb-3 overflow-x-auto">
-              <a *ngFor="let item of nav()"
-                 [routerLink]="item.route"
-                 routerLinkActive="bg-brand-50 text-brand-700 font-semibold"
-                 [routerLinkActiveOptions]="{exact: false}"
-                 class="group flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-cream-100 hover:text-slate-800 transition whitespace-nowrap">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 shrink-0">
-                      <path [attr.d]="item.icon"/>
-                  </svg>
-                  <span>{{ item.label }}</span>
-                  <span *ngIf="item.showBadge && cart.count() > 0"
-                        class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-brand-500 text-white text-xs font-bold">
-                      {{ cart.count() }}
-                  </span>
-              </a>
-          </nav>
         </header>
 
         <!-- Content -->
@@ -159,6 +136,31 @@
         </main>
     </div>
 </div>
+
+<!-- Menú de usuario (compartido) -->
+<ng-template #userMenu>
+    <div class="relative shrink-0">
+        <button (click)="toggleUserMenu()"
+                class="flex items-center gap-2 rounded-full pl-1 pr-2 md:pr-3 py-1 hover:bg-cream-100 transition">
+            <div class="w-9 h-9 rounded-full bg-sage-100 text-sage-700 flex items-center justify-center font-semibold uppercase">
+                {{ (auth.user()?.full_name || auth.user()?.username || '?')[0] }}
+            </div>
+            <span class="hidden md:inline text-sm font-medium text-slate-700">
+                {{ auth.user()?.full_name || auth.user()?.username }}
+            </span>
+        </button>
+        <div *ngIf="userMenuOpen()"
+             class="absolute right-0 mt-2 w-56 rounded-lg bg-white shadow-lift border border-cream-200 py-1 z-50">
+            <div class="px-4 py-2 border-b border-cream-200">
+                <p class="text-sm font-semibold text-slate-800">{{ auth.user()?.full_name || auth.user()?.username }}</p>
+                <p class="text-xs text-slate-500">{{ auth.user()?.is_admin ? 'Administrador' : 'Cliente' }}</p>
+            </div>
+            <button (click)="logout()" class="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-cream-50">
+                Cerrar sesión
+            </button>
+        </div>
+    </div>
+</ng-template>
 
 <!-- Botón flotante de WhatsApp -->
 <a href="https://wa.me/5493416747476" target="_blank" rel="noopener noreferrer"
