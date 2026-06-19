@@ -11,7 +11,7 @@
         <button (click)="setSection('catalog')"
                 class="rounded-md px-4 py-1.5 text-sm font-medium transition"
                 [class.bg-brand-500]="section() === 'catalog'" [class.text-white]="section() === 'catalog'"
-                [class.text-slate-600]="section() !== 'catalog'">Catálogo</button>
+                [class.text-slate-600]="section() !== 'catalog'">Productos</button>
         <button (click)="setSection('offer')"
                 class="rounded-md px-4 py-1.5 text-sm font-medium transition"
                 [class.bg-brand-500]="section() === 'offer'" [class.text-white]="section() === 'offer'"
@@ -41,7 +41,7 @@
     <div class="card overflow-hidden">
         <div class="flex items-center justify-between p-4 border-b border-cream-200 bg-cream-50">
             <h3 class="font-display text-lg font-semibold text-slate-800">
-                Destacados de {{ section() === 'offer' ? 'ofertas' : 'catálogo' }} ({{ list().length }})
+                Destacados de {{ section() === 'offer' ? 'ofertas' : 'productos' }} ({{ list().length }})
             </h3>
             <button class="btn-primary text-sm" [disabled]="saving()" (click)="save()">
                 {{ saving() ? 'Guardando…' : 'Guardar orden' }}
