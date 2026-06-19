@@ -31,10 +31,23 @@ export class CatalogPage implements OnInit {
     offerPreview = signal<Product[]>([]);
     showOffersPopup = signal(false);
 
-    // Aviso de consulta de stock
+    // Aviso de consulta de stock (por producto)
     showStock = signal(false);
-    readonly stockWhatsapp = 'https://wa.me/5493416747476?text=' +
-        encodeURIComponent('Hola, quería consultar disponibilidad de stock.');
+    stockProduct = signal<Product | null>(null);
+
+    stockWhatsapp = computed(() => {
+        const p = this.stockProduct();
+        const msg = p
+            ? `Hola, quería consultar el stock de "${p.name}"${p.code ? ' (cód. ' + p.code + ')' : ''}.`
+            : 'Hola, quería consultar disponibilidad de stock.';
+        return 'https://wa.me/5493416747476?text=' + encodeURIComponent(msg);
+    });
+
+    openStock(p: Product, ev: Event) {
+        ev.stopPropagation();
+        this.stockProduct.set(p);
+        this.showStock.set(true);
+    }
 
     supplierId: number | null = null;
     categoryName: string | null = null;
