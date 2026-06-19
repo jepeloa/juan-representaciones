@@ -92,6 +92,7 @@
                            [class.text-brand-700]="it.product.currency === 'USD'">
                             {{ fmtPrice(effPrice(it.product) * it.quantity, it.product.currency || 'ARS') }}
                         </p>
+                        <p class="text-[10px] text-slate-400 leading-none">+ IVA</p>
                     </div>
                 </div>
             </div>
@@ -107,14 +108,14 @@
 
                 <div class="border-t border-cream-100 pt-4 space-y-2 text-sm">
                     <div *ngIf="subtotalsByCurrency()['ARS'] > 0" class="flex justify-between font-bold text-lg text-sage-700">
-                        <span>Total ARS</span>
+                        <span>Total ARS <span class="text-xs font-normal text-slate-400">+ IVA</span></span>
                         <span class="tabular-nums">{{ fmtPrice(subtotalsByCurrency()['ARS'], 'ARS') }}</span>
                     </div>
                     <div *ngIf="subtotalsByCurrency()['USD'] > 0" class="flex justify-between font-bold text-lg text-brand-700">
-                        <span>Total USD</span>
+                        <span>Total USD <span class="text-xs font-normal text-slate-400">+ IVA</span></span>
                         <span class="tabular-nums">{{ fmtPrice(subtotalsByCurrency()['USD'], 'USD') }}</span>
                     </div>
-                    <p class="text-xs text-slate-400 pt-1">Las condiciones de pago de cada marca figuran en el PDF.</p>
+                    <p class="text-xs text-slate-400 pt-1">Los precios son sin IVA. Las condiciones de pago de cada marca figuran en el PDF.</p>
                 </div>
 
                 <div *ngIf="error()" class="rounded-lg bg-blush-50 border border-blush-200 px-3 py-2 text-xs text-blush-500">

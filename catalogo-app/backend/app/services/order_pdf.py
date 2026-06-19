@@ -141,7 +141,9 @@ def build_order_pdf(
         ('BOTTOMPADDING', (0, 0), (-1, -1), 2),
     ]))
     story.append(info_table)
-    story.append(Spacer(1, 6 * mm))
+    story.append(Spacer(1, 3 * mm))
+    story.append(Paragraph('Los precios indicados no incluyen IVA.', muted))
+    story.append(Spacer(1, 5 * mm))
 
     # ===== Agrupado por MARCA =====
     brands: "OrderedDict[str, list]" = OrderedDict()
@@ -199,7 +201,7 @@ def build_order_pdf(
         for cur in ('ARS', 'USD'):
             if tot[cur] > 0:
                 total_rows.append([
-                    Paragraph(f"<b>Total {brand} ({cur})</b>", body),
+                    Paragraph(f"<b>Total {brand} ({cur})</b> <font size='7'>+ IVA</font>", body),
                     _fmt_money(tot[cur], cur),
                 ])
         if total_rows:

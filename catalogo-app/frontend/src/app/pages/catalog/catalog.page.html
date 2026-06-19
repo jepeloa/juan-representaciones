@@ -136,6 +136,7 @@
                                   [class.text-brand-700]="!isOnOffer(p) && p.currency === 'USD'">
                                 {{ (isOnOffer(p) ? fmtPrice(p.offer_price, p.currency) : fmtPrice(p.price, p.currency)) || '—' }}
                             </span>
+                            <span *ngIf="p.price !== null" class="block text-[10px] font-normal text-slate-400 leading-none">+ IVA</span>
                         </td>
                         <td class="py-2 px-3">
                             <span *ngIf="p.currency" class="badge"
@@ -196,6 +197,7 @@
                           [class.text-brand-700]="!isOnOffer(p) && p.currency === 'USD'">
                         {{ p.price !== null ? fmtPrice(isOnOffer(p) ? p.offer_price : p.price, p.currency) : '' }}
                     </span>
+                    <span *ngIf="p.price !== null" class="text-[10px] text-slate-400">+ IVA</span>
                     <span *ngIf="!p.currency || p.price === null" class="badge bg-blush-50 text-blush-500 text-[10px]">Consultar</span>
                 </div>
             </div>
@@ -255,6 +257,7 @@
                               [class.text-brand-700]="!isOnOffer(p) && p.currency === 'USD'">
                             {{ fmtPrice(isOnOffer(p) ? p.offer_price : p.price, p.currency) }}
                         </span>
+                        <span class="text-[10px] font-normal text-slate-400 ml-0.5">+ IVA</span>
                     </div>
                     <ng-template #noprice><span class="badge bg-blush-50 text-blush-500">Consultar</span></ng-template>
                     <ng-container *ngIf="p.price !== null">

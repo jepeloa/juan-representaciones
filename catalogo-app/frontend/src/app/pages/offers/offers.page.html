@@ -41,6 +41,7 @@
                     <div class="min-w-0">
                         <span class="block text-xs text-slate-400 line-through leading-none">{{ fmtPrice(p.price, p.currency) }}</span>
                         <span class="text-base font-bold text-blush-600">{{ fmtPrice(p.offer_price, p.currency) }}</span>
+                        <span class="text-[10px] font-normal text-slate-400">+ IVA</span>
                     </div>
                     <button *ngIf="!cart.has(p.id); else inCartGrid" (click)="addToCart(p, $event)"
                             class="w-10 h-10 rounded-lg bg-brand-500 text-white hover:bg-brand-600 transition flex items-center justify-center flex-shrink-0 shadow-soft"

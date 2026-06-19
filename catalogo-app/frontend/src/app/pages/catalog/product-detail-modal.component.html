@@ -51,6 +51,7 @@
                           [class.text-brand-700]="!onOffer && product.currency === 'USD'">
                         {{ fmtPrice(onOffer ? product.offer_price : product.price, product.currency) }}
                     </span>
+                    <span *ngIf="product.price !== null" class="text-xs font-normal text-slate-400">+ IVA</span>
                     <span *ngIf="onOffer" class="badge bg-blush-500 text-white">
                         {{ offerPct > 0 ? '-' + offerPct + '% OFF' : 'OFERTA' }}
                     </span>
