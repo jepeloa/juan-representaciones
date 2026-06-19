@@ -101,42 +101,20 @@
         <div class="space-y-4 lg:sticky lg:top-4 self-start">
             <div class="card p-5 space-y-4">
                 <div>
-                    <label class="label mb-1 block">Condición de pago</label>
-                    <select class="input" [ngModel]="selectedConditionId()" (ngModelChange)="selectedConditionId.set($event)">
-                        <option *ngFor="let c of conditions()" [ngValue]="c.id">{{ c.name }}</option>
-                    </select>
-                    <p *ngIf="selectedCondition()" class="mt-2 text-xs text-slate-500">
-                        {{ selectedCondition()?.description }}
-                        <span class="ml-1 badge bg-beige-100 text-beige-700">× {{ selectedCondition()?.multiplier }}</span>
-                    </p>
-                </div>
-
-                <div>
                     <label class="label mb-1 block">Notas (opcional)</label>
                     <textarea class="input" rows="2" [(ngModel)]="customerNotes" placeholder="Comentarios para el pedido…"></textarea>
                 </div>
 
                 <div class="border-t border-cream-100 pt-4 space-y-2 text-sm">
-                    <ng-container *ngIf="subtotalsByCurrency()['ARS'] > 0">
-                        <div class="flex justify-between text-slate-500">
-                            <span>Subtotal lista (ARS)</span>
-                            <span class="tabular-nums">{{ fmtPrice(subtotalsByCurrency()['ARS'], 'ARS') }}</span>
-                        </div>
-                        <div class="flex justify-between font-bold text-lg text-sage-700">
-                            <span>Total ARS</span>
-                            <span class="tabular-nums">{{ fmtPrice(totalsByCurrency()['ARS'], 'ARS') }}</span>
-                        </div>
-                    </ng-container>
-                    <ng-container *ngIf="subtotalsByCurrency()['USD'] > 0">
-                        <div class="flex justify-between text-slate-500 mt-3">
-                            <span>Subtotal lista (USD)</span>
-                            <span class="tabular-nums">{{ fmtPrice(subtotalsByCurrency()['USD'], 'USD') }}</span>
-                        </div>
-                        <div class="flex justify-between font-bold text-lg text-brand-700">
-                            <span>Total USD</span>
-                            <span class="tabular-nums">{{ fmtPrice(totalsByCurrency()['USD'], 'USD') }}</span>
-                        </div>
-                    </ng-container>
+                    <div *ngIf="subtotalsByCurrency()['ARS'] > 0" class="flex justify-between font-bold text-lg text-sage-700">
+                        <span>Total ARS</span>
+                        <span class="tabular-nums">{{ fmtPrice(subtotalsByCurrency()['ARS'], 'ARS') }}</span>
+                    </div>
+                    <div *ngIf="subtotalsByCurrency()['USD'] > 0" class="flex justify-between font-bold text-lg text-brand-700">
+                        <span>Total USD</span>
+                        <span class="tabular-nums">{{ fmtPrice(subtotalsByCurrency()['USD'], 'USD') }}</span>
+                    </div>
+                    <p class="text-xs text-slate-400 pt-1">Las condiciones de pago de cada marca figuran en el PDF.</p>
                 </div>
 
                 <div *ngIf="error()" class="rounded-lg bg-blush-50 border border-blush-200 px-3 py-2 text-xs text-blush-500">

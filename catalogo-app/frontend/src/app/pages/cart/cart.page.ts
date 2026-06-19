@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
-import { CartService, Order, PaymentCondition, PublicSettings } from '../../core/cart.service';
+import { CartService, Order, PublicSettings } from '../../core/cart.service';
 import { Product } from '../../core/models';
 
 @Component({
@@ -13,24 +13,12 @@ import { Product } from '../../core/models';
     templateUrl: './cart.page.html',
 })
 export class CartPage implements OnInit {
-    conditions = signal<PaymentCondition[]>([]);
     settings = signal<PublicSettings | null>(null);
-    selectedConditionId = signal<number | null>(null);
     customerNotes = '';
     loading = signal(false);
     error = signal<string | null>(null);
     successOrderId = signal<number | null>(null);
     lastOrder = signal<Order | null>(null);
-
-    selectedCondition = computed<PaymentCondition | null>(() => {
-        const id = this.selectedConditionId();
-        return this.conditions().find(c => c.id === id) ?? null;
-    });
-
-    multiplier = computed(() => {
-        const c = this.selectedCondition();
-        return c ? Number(c.multiplier) : 1;
-    });
 
     termsLabel(p: Product): string {
         return (p.payment_conditions ?? []).map(c => c.name).join(', ');
@@ -54,20 +42,9 @@ export class CartPage implements OnInit {
         return out;
     });
 
-    totalsByCurrency = computed(() => {
-        const subs = this.subtotalsByCurrency();
-        const m = this.multiplier();
-        return { ARS: subs['ARS'] * m, USD: subs['USD'] * m };
-    });
-
     constructor(public cart: CartService, private router: Router) {}
 
     ngOnInit() {
-        this.cart.getPaymentConditions().subscribe(c => {
-            this.conditions.set(c);
-            const def = c.find(x => Number(x.multiplier) === 1) || c[0];
-            if (def) this.selectedConditionId.set(def.id);
-        });
         this.cart.getPublicSettings().subscribe(s => this.settings.set(s));
     }
 
@@ -81,7 +58,7 @@ export class CartPage implements OnInit {
         this.loading.set(true);
         this.error.set(null);
         this.cart.createOrder({
-            payment_condition_id: this.selectedConditionId(),
+            payment_condition_id: null,
             customer_notes: this.customerNotes || null,
             items: this.cart.items().map(it => ({ product_id: it.product.id, quantity: it.quantity })),
         }).subscribe({
