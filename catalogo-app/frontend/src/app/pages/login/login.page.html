@@ -20,6 +20,10 @@
             <h1 class="font-display text-3xl md:text-4xl font-bold text-brand-900 mb-2 text-center lg:text-left">Bienvenidos</h1>
             <p class="text-sm text-slate-500 mb-8 text-center lg:text-left">Iniciá sesión para continuar.</p>
 
+            <div *ngIf="notice()" class="rounded-lg bg-gold-50 border border-gold-200 px-4 py-3 text-sm text-brand-800 mb-5">
+                {{ notice() }}
+            </div>
+
             <form (ngSubmit)="submit()" class="space-y-5">
                 <div>
                     <label class="label mb-1 block">Usuario</label>

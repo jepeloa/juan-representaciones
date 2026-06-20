@@ -15,9 +15,14 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         : req;
     return next(cloned).pipe(
         catchError((err: HttpErrorResponse) => {
-            if (err.status === 401 && isApi && !req.url.endsWith('/auth/login')) {
+            const isLogin = req.url.endsWith('/auth/login');
+            // 401: token inválido o vencido.
+            // 403 con sesión que se cree admin: desajuste token↔usuario (p. ej. otra
+            //     pestaña inició sesión como cliente y pisó el token). Forzar re-login.
+            const tokenMismatch = err.status === 403 && !!auth.user()?.is_admin;
+            if (isApi && !isLogin && (err.status === 401 || tokenMismatch)) {
                 auth.logout();
-                router.navigate(['/login']);
+                router.navigate(['/login'], { queryParams: { expired: 1 } });
             }
             return throwError(() => err);
         }),

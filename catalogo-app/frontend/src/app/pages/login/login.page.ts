@@ -1,7 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import { AuthService } from '../../core/auth.service';
 
@@ -16,9 +16,13 @@ export class LoginPage {
     password = '';
     loading = signal(false);
     error = signal<string | null>(null);
+    notice = signal<string | null>(null);
 
-    constructor(private auth: AuthService, private router: Router) {
+    constructor(private auth: AuthService, private router: Router, private route: ActivatedRoute) {
         if (this.auth.isAuthenticated()) this.router.navigate([this.home()]);
+        if (this.route.snapshot.queryParamMap.get('expired')) {
+            this.notice.set('Tu sesión expiró o se inició sesión con otra cuenta. Volvé a ingresar.');
+        }
     }
 
     /** Cliente arranca en Marcas; admin en Productos. */
