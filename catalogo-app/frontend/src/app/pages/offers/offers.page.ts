@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
@@ -18,7 +18,34 @@ export class OffersPage implements OnInit {
     loading = signal(false);
     selectedProduct = signal<ProductDetail | null>(null);
 
+    // Condiciones comerciales (de la marca del producto)
+    showConditions = signal(false);
+    conditionsProduct = signal<Product | null>(null);
+
+    // Consultar stock (por producto)
+    showStock = signal(false);
+    stockProduct = signal<Product | null>(null);
+    stockWhatsapp = computed(() => {
+        const p = this.stockProduct();
+        const msg = p
+            ? `Hola, quería consultar el stock de "${p.name}"${p.code ? ' (cód. ' + p.code + ')' : ''}.`
+            : 'Hola, quería consultar disponibilidad de stock.';
+        return 'https://wa.me/5493416747476?text=' + encodeURIComponent(msg);
+    });
+
     constructor(private svc: CatalogService, public cart: CartService) {}
+
+    openConditions(p: Product, ev?: Event) {
+        ev?.stopPropagation();
+        this.conditionsProduct.set(p);
+        this.showConditions.set(true);
+    }
+
+    openStock(p: Product, ev?: Event) {
+        ev?.stopPropagation();
+        this.stockProduct.set(p);
+        this.showStock.set(true);
+    }
 
     ngOnInit() {
         this.loading.set(true);

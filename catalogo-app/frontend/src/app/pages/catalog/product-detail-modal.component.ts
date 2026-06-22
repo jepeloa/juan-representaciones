@@ -13,10 +13,16 @@ import { CartService } from '../../core/cart.service';
 export class ProductDetailModalComponent {
     @Input() product: ProductDetail | null = null;
     @Output() close = new EventEmitter<void>();
+    @Output() viewConditions = new EventEmitter<ProductDetail>();
+    @Output() viewStock = new EventEmitter<ProductDetail>();
 
     zoomed = signal<string | null>(null);
 
     constructor(public cart: CartService) {}
+
+    get hasConditions(): boolean {
+        return !!this.product?.payment_conditions?.length;
+    }
 
     onClose() {
         this.zoomed.set(null);

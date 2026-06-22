@@ -43,10 +43,24 @@ export class CatalogPage implements OnInit {
         return 'https://wa.me/5493416747476?text=' + encodeURIComponent(msg);
     });
 
-    openStock(p: Product, ev: Event) {
-        ev.stopPropagation();
+    openStock(p: Product, ev?: Event) {
+        ev?.stopPropagation();
         this.stockProduct.set(p);
         this.showStock.set(true);
+    }
+
+    // Condiciones comerciales (de la marca del producto)
+    showConditions = signal(false);
+    conditionsProduct = signal<Product | null>(null);
+
+    openConditions(p: Product, ev?: Event) {
+        ev?.stopPropagation();
+        this.conditionsProduct.set(p);
+        this.showConditions.set(true);
+    }
+
+    hasConditions(p: Product): boolean {
+        return !!p.payment_conditions && p.payment_conditions.length > 0;
     }
 
     supplierId: number | null = null;

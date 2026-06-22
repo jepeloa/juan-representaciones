@@ -281,13 +281,22 @@
                         </ng-template>
                     </ng-container>
                 </div>
-                <button (click)="openStock(p, $event)"
-                        class="mt-1 inline-flex items-center gap-1 self-start text-xs font-medium text-brand-600 hover:text-brand-800 hover:underline">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5">
-                        <path d="M3 6a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V6Zm9 1a1 1 0 0 0-1 1v5a1 1 0 1 0 2 0V8a1 1 0 0 0-1-1Zm0 9.25a1.1 1.1 0 1 0 0 2.2 1.1 1.1 0 0 0 0-2.2Z"/>
-                    </svg>
-                    Consultar stock
-                </button>
+                <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
+                    <button *ngIf="hasConditions(p)" (click)="openConditions(p, $event)"
+                            class="inline-flex items-center gap-1 text-xs font-medium text-sage-700 hover:text-sage-800 hover:underline">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5">
+                            <path d="M4 4a2 2 0 0 1 2-2h7.586a2 2 0 0 1 1.414.586l3.414 3.414A2 2 0 0 1 19 7.414V20a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4Zm4 6a1 1 0 1 0 0 2h8a1 1 0 1 0 0-2H8Zm0 4a1 1 0 1 0 0 2h8a1 1 0 1 0 0-2H8Z"/>
+                        </svg>
+                        Condiciones
+                    </button>
+                    <button (click)="openStock(p, $event)"
+                            class="inline-flex items-center gap-1 text-xs font-medium text-brand-600 hover:text-brand-800 hover:underline">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5">
+                            <path d="M3 6a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V6Zm9 1a1 1 0 0 0-1 1v5a1 1 0 1 0 2 0V8a1 1 0 0 0-1-1Zm0 9.25a1.1 1.1 0 1 0 0 2.2 1.1 1.1 0 0 0 0-2.2Z"/>
+                        </svg>
+                        Consultar stock
+                    </button>
+                </div>
             </div>
         </div>
         <div *ngIf="!loading() && !products().length" class="col-span-full py-16 text-center text-slate-400">
@@ -305,7 +314,9 @@
 
 <app-product-detail-modal
     [product]="selectedProduct()"
-    (close)="closeDetail()">
+    (close)="closeDetail()"
+    (viewConditions)="openConditions($event)"
+    (viewStock)="openStock($event)">
 </app-product-detail-modal>
 
 <!-- Popup de ofertas del día -->
@@ -342,6 +353,29 @@
         <div class="flex justify-end gap-2 p-4 border-t border-cream-200 bg-cream-50">
             <button class="btn-ghost" (click)="closeOffersPopup()">Ahora no</button>
             <button class="btn-primary" (click)="goToOffers()">Ver todas las ofertas →</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: condiciones comerciales de la marca del producto -->
+<div *ngIf="showConditions() && conditionsProduct() as cp"
+     class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm"
+     (click)="showConditions.set(false)">
+    <div class="card max-w-md w-full overflow-hidden" (click)="$event.stopPropagation()">
+        <div class="relative bg-brand-500 text-white px-5 py-4">
+            <h3 class="font-display text-lg font-bold">Condiciones comerciales</h3>
+            <p class="text-sm text-white/90">{{ cp.supplier_name }}</p>
+            <button (click)="showConditions.set(false)" aria-label="Cerrar"
+                    class="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <div class="p-4 space-y-2 max-h-[60vh] overflow-y-auto">
+            <div *ngFor="let c of cp.payment_conditions" class="rounded-lg border border-cream-200 px-3 py-2">
+                <p class="text-sm text-slate-700 whitespace-pre-line">{{ c.description || c.name }}</p>
+            </div>
         </div>
     </div>
 </div>
