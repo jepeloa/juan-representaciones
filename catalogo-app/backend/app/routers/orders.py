@@ -141,6 +141,11 @@ def create_order(
     db.commit()
     db.refresh(order)
 
+    # Registrar la compra como actividad del cliente
+    from app.routers.activity import log_event
+    log_event(db, user.id, 'order', label=f'Orden #{order.id} · {len(order.items)} ítem(s)', ref_id=order.id)
+    db.commit()
+
     # Fire-and-forget email send
     from app.services.mailer import send_order_email
     background.add_task(send_order_email, order.id)

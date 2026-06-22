@@ -8,6 +8,7 @@ import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/auth.service';
 import { CartService } from '../../core/cart.service';
 import { SearchService } from '../../core/search.service';
+import { ActivityService } from '../../core/activity.service';
 
 interface NavItem {
     label: string;
@@ -82,6 +83,12 @@ export class ShellComponent {
             icon: 'M15 8a3 3 0 1 0-6 0 3 3 0 0 0 6 0Zm6 0a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm-3 5a5 5 0 0 0-5 5v1h10v-1a5 5 0 0 0-5-5Zm-9 6v-1a5 5 0 0 1 5-5h0a4.99 4.99 0 0 0-2 4v2H9Z',
             adminOnly: true,
         },
+        {
+            label: 'Clientes',
+            route: '/admin/clientes',
+            icon: 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-7 9a7 7 0 0 1 14 0v.5H5V21Zm14.5-8.5a3 3 0 1 0-3-5.2 5 5 0 0 1 0 6.9 3 3 0 0 0 3-1.7Z',
+            adminOnly: true,
+        },
     ];
 
     nav = computed<NavItem[]>(() =>
@@ -97,16 +104,36 @@ export class ShellComponent {
         public cart: CartService,
         public search: SearchService,
         private router: Router,
+        private activity: ActivityService,
     ) {
-        // Auto-close mobile drawer on navigation.
+        // Auto-close mobile drawer + registrar la vista de página (solo clientes).
         this.router.events
             .pipe(filter(e => e instanceof NavigationEnd))
-            .subscribe(() => this.mobileOpen.set(false));
+            .subscribe(e => {
+                this.mobileOpen.set(false);
+                if (!this.auth.user()?.is_admin) {
+                    const url = (e as NavigationEnd).urlAfterRedirects;
+                    this.activity.track('page_view', { path: url, label: this.sectionLabel(url) });
+                }
+            });
+    }
+
+    /** Nombre legible de la sección a partir de la ruta. */
+    private sectionLabel(url: string): string {
+        const u = url.split('?')[0];
+        if (u.startsWith('/proveedores')) return 'Marcas';
+        if (u.startsWith('/catalogo')) return 'Producto';
+        if (u.startsWith('/ofertas')) return 'Ofertas';
+        if (u.startsWith('/carrito')) return 'Mi orden';
+        return u;
     }
 
     /** Buscador global (cliente): actualiza el texto y asegura estar en el catálogo. */
     onSearch(value: string) {
         this.search.query.set(value);
+        if (value && value.trim().length >= 2 && !this.auth.user()?.is_admin) {
+            this.activity.track('search', { label: value.trim() });
+        }
         if (!this.router.url.startsWith('/catalogo')) {
             this.router.navigate(['/catalogo']);
         }

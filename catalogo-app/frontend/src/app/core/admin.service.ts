@@ -63,6 +63,17 @@ export class AdminService {
         return this.http.delete<void>(`${API_BASE}/admin/users/${id}`);
     }
 
+    // ===== Clientes (dashboard) =====
+    listClients(): Observable<ClientListItem[]> {
+        return this.http.get<ClientListItem[]>(`${API_BASE}/admin/clients`);
+    }
+    getClient(id: number): Observable<ClientDetail> {
+        return this.http.get<ClientDetail>(`${API_BASE}/admin/clients/${id}`);
+    }
+    saveClientProfile(id: number, body: ClientProfileBody): Observable<ClientProfile> {
+        return this.http.put<ClientProfile>(`${API_BASE}/admin/clients/${id}/profile`, body);
+    }
+
     // ===== Products =====
     private toFormData(body: ProductFormData, files: File[] = [], extra: Record<string, string> = {}): FormData {
         const fd = new FormData();
@@ -183,5 +194,100 @@ export interface AdminSettings {
     company_name: string | null;
     company_contact: string | null;
     order_notification_email: string | null;
+}
+
+// ===== Clientes =====
+export interface ClientListItem {
+    id: number;
+    username: string;
+    full_name: string | null;
+    is_active: boolean;
+    created_at: string;
+    company_name: string | null;
+    visits: number;
+    events_count: number;
+    orders_count: number;
+    total_ars: string | number;
+    total_usd: string | number;
+    last_active: string | null;
+}
+
+export interface ClientProfileBody {
+    company_name?: string | null;
+    tax_id?: string | null;
+    tax_condition?: string | null;
+    email?: string | null;
+    phone?: string | null;
+    contact_name?: string | null;
+    address_street?: string | null;
+    address_city?: string | null;
+    address_state?: string | null;
+    address_zip?: string | null;
+    notes?: string | null;
+}
+
+export interface ClientProfile extends ClientProfileBody {
+    id: number;
+    user_id: number;
+    updated_at: string | null;
+}
+
+export interface ActivityEvent {
+    id: number;
+    event_type: string;
+    label: string | null;
+    path: string | null;
+    ref_id: number | null;
+    created_at: string;
+}
+
+export interface ActivityCount { event_type: string; count: number; }
+export interface TopProduct { ref_id: number | null; label: string | null; count: number; }
+
+export interface ClientStats {
+    visits: number;
+    events_count: number;
+    orders_count: number;
+    total_ars: string | number;
+    total_usd: string | number;
+    first_active: string | null;
+    last_active: string | null;
+    by_type: ActivityCount[];
+    top_products: TopProduct[];
+}
+
+export interface ClientOrderItem {
+    id: number;
+    quantity: number;
+    unit_price_final: string | number;
+    currency: string;
+    line_total: string | number;
+    product_name: string;
+    product_code: string | null;
+    supplier_name: string | null;
+}
+
+export interface ClientOrder {
+    id: number;
+    payment_name: string | null;
+    total_ars: string | number;
+    total_usd: string | number;
+    status: string;
+    created_at: string;
+    customer_notes: string | null;
+    items: ClientOrderItem[];
+}
+
+export interface ClientDetail {
+    id: number;
+    username: string;
+    full_name: string | null;
+    is_active: boolean;
+    is_admin: boolean;
+    created_at: string;
+    profile: ClientProfile | null;
+    stats: ClientStats;
+    recent_activity: ActivityEvent[];
+    orders: ClientOrder[];
 }
 

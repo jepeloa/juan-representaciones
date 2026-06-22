@@ -12,6 +12,10 @@ from app.schemas.orders import (
     SettingIn, SettingsBulkIn, SettingsOut,
     OrderItemIn, OrderItemOut, OrderCreateIn, OrderOut,
 )
+from app.schemas.clients import (
+    ClientProfileIn, ClientProfileOut, ActivityEventIn, ActivityEventOut,
+    ClientListItemOut, ClientStatsOut, ClientDetailOut, ActivityCount, TopProduct,
+)
 
 __all__ = [
     'LoginIn', 'TokenOut', 'UserOut',
@@ -22,4 +26,6 @@ __all__ = [
     'PaymentConditionIn', 'PaymentConditionOut',
     'SettingIn', 'SettingsBulkIn', 'SettingsOut',
     'OrderItemIn', 'OrderItemOut', 'OrderCreateIn', 'OrderOut',
+    'ClientProfileIn', 'ClientProfileOut', 'ActivityEventIn', 'ActivityEventOut',
+    'ClientListItemOut', 'ClientStatsOut', 'ClientDetailOut', 'ActivityCount', 'TopProduct',
 ]

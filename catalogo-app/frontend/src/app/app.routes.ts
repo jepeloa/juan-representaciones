@@ -63,6 +63,11 @@ export const routes: Routes = [
                 canActivate: [adminGuard],
                 loadComponent: () => import('./pages/admin-users/admin-users.page').then(m => m.AdminUsersPage),
             },
+            {
+                path: 'admin/clientes',
+                canActivate: [adminGuard],
+                loadComponent: () => import('./pages/admin-clients/admin-clients.page').then(m => m.AdminClientsPage),
+            },
         ],
     },
     { path: '**', redirectTo: 'catalogo' },

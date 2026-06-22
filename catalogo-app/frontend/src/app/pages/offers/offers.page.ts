@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 
 import { CatalogService } from '../../core/catalog.service';
 import { CartService } from '../../core/cart.service';
+import { ActivityService } from '../../core/activity.service';
 import { Product, ProductDetail } from '../../core/models';
 import { ProductDetailModalComponent } from '../catalog/product-detail-modal.component';
 
@@ -33,18 +34,20 @@ export class OffersPage implements OnInit {
         return 'https://wa.me/5493416747476?text=' + encodeURIComponent(msg);
     });
 
-    constructor(private svc: CatalogService, public cart: CartService) {}
+    constructor(private svc: CatalogService, public cart: CartService, private activity: ActivityService) {}
 
     openConditions(p: Product, ev?: Event) {
         ev?.stopPropagation();
         this.conditionsProduct.set(p);
         this.showConditions.set(true);
+        this.activity.track('view_conditions', { label: p.supplier_name, refId: p.id });
     }
 
     openStock(p: Product, ev?: Event) {
         ev?.stopPropagation();
         this.stockProduct.set(p);
         this.showStock.set(true);
+        this.activity.track('view_stock', { label: p.name, refId: p.id });
     }
 
     ngOnInit() {
@@ -59,9 +62,11 @@ export class OffersPage implements OnInit {
         ev.stopPropagation();
         if (p.price === null || p.price === undefined) return;
         this.cart.add(p, 1);
+        this.activity.track('add_to_cart', { label: p.name, refId: p.id });
     }
 
     openDetail(p: Product) {
+        this.activity.track('product_view', { label: p.name, refId: p.id });
         this.svc.get(p.id).subscribe(detail => this.selectedProduct.set(detail));
     }
 

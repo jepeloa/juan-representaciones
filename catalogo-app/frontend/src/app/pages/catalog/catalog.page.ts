@@ -8,6 +8,7 @@ import { CatalogService, ProductQuery } from '../../core/catalog.service';
 import { CartService } from '../../core/cart.service';
 import { AuthService } from '../../core/auth.service';
 import { SearchService } from '../../core/search.service';
+import { ActivityService } from '../../core/activity.service';
 import { Category, Facets, Product, ProductDetail, Supplier } from '../../core/models';
 import { ProductDetailModalComponent } from './product-detail-modal.component';
 
@@ -47,6 +48,7 @@ export class CatalogPage implements OnInit {
         ev?.stopPropagation();
         this.stockProduct.set(p);
         this.showStock.set(true);
+        this.activity.track('view_stock', { label: p.name, refId: p.id });
     }
 
     // Condiciones comerciales (de la marca del producto)
@@ -57,6 +59,7 @@ export class CatalogPage implements OnInit {
         ev?.stopPropagation();
         this.conditionsProduct.set(p);
         this.showConditions.set(true);
+        this.activity.track('view_conditions', { label: p.supplier_name, refId: p.id });
     }
 
     hasConditions(p: Product): boolean {
@@ -88,6 +91,7 @@ export class CatalogPage implements OnInit {
         public search: SearchService,
         private route: ActivatedRoute,
         private router: Router,
+        private activity: ActivityService,
     ) {
         this.search$.pipe(debounceTime(300)).subscribe(() => this.fetch());
         // El texto de búsqueda es global (shell + página): al cambiar, recargar.
@@ -107,6 +111,7 @@ export class CatalogPage implements OnInit {
         ev.stopPropagation();
         if (p.price === null || p.price === undefined) return;
         this.cart.add(p, 1);
+        this.activity.track('add_to_cart', { label: p.name, refId: p.id });
     }
 
     ngOnInit() {
@@ -242,6 +247,7 @@ export class CatalogPage implements OnInit {
     }
 
     openDetail(p: Product) {
+        this.activity.track('product_view', { label: p.name, refId: p.id });
         this.svc.get(p.id).subscribe(detail => this.selectedProduct.set(detail));
     }
 

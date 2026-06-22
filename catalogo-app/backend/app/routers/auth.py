@@ -17,6 +17,10 @@ def login(creds: LoginIn, db: Session = Depends(get_db)):
     if not user or not user.is_active or not verify_password(creds.password, user.password_hash):
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, 'Usuario o contraseña incorrectos')
     token = create_access_token(user.id, extra={'username': user.username})
+    # Registrar el inicio de sesión como actividad (solo clientes; el admin también queda).
+    from app.routers.activity import log_event
+    log_event(db, user.id, 'login')
+    db.commit()
     return TokenOut(access_token=token, user=UserOut.model_validate(user))
 
 

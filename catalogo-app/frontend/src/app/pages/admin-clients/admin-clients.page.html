@@ -1,0 +1,241 @@
+<div class="p-3 md:p-6 space-y-4 md:space-y-6">
+
+    <!-- ============ LISTA ============ -->
+    <ng-container *ngIf="!selected() && !loadingDetail()">
+        <div>
+            <h2 class="font-display text-xl md:text-2xl font-bold text-slate-800">Clientes</h2>
+            <p class="text-xs md:text-sm text-slate-500">{{ clients().length }} cliente<span *ngIf="clients().length !== 1">s</span> · actividad y compras</p>
+        </div>
+
+        <div *ngIf="loading()" class="text-center py-12 text-slate-400">Cargando…</div>
+
+        <div *ngIf="!loading() && !clients().length" class="card p-12 text-center text-slate-500">
+            Todavía no hay clientes cargados. Crealos en la sección “Usuarios”.
+        </div>
+
+        <div *ngIf="!loading() && clients().length" class="card overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead class="bg-cream-100 text-slate-600 border-b border-cream-200">
+                        <tr>
+                            <th class="py-3 px-3 text-left text-xs font-semibold uppercase tracking-wider">Cliente</th>
+                            <th class="py-3 px-3 text-center text-xs font-semibold uppercase tracking-wider">Visitas</th>
+                            <th class="py-3 px-3 text-center text-xs font-semibold uppercase tracking-wider hidden sm:table-cell">Actividad</th>
+                            <th class="py-3 px-3 text-center text-xs font-semibold uppercase tracking-wider">Compras</th>
+                            <th class="py-3 px-3 text-right text-xs font-semibold uppercase tracking-wider hidden md:table-cell">Total comprado</th>
+                            <th class="py-3 px-3 text-left text-xs font-semibold uppercase tracking-wider hidden lg:table-cell">Última actividad</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-cream-100">
+                        <tr *ngFor="let c of clients()" class="hover:bg-cream-50 cursor-pointer transition" (click)="open(c)">
+                            <td class="py-2.5 px-3">
+                                <div class="font-semibold text-slate-800">{{ c.full_name || c.username }}</div>
+                                <div class="text-xs text-slate-500">
+                                    {{ '@' + c.username }}<span *ngIf="c.company_name"> · {{ c.company_name }}</span>
+                                    <span *ngIf="!c.is_active" class="badge bg-blush-50 text-blush-500 ml-1">inactivo</span>
+                                </div>
+                            </td>
+                            <td class="py-2.5 px-3 text-center tabular-nums">{{ c.visits }}</td>
+                            <td class="py-2.5 px-3 text-center tabular-nums hidden sm:table-cell">{{ c.events_count }}</td>
+                            <td class="py-2.5 px-3 text-center tabular-nums">
+                                <span class="badge" [class.bg-sage-100]="c.orders_count > 0" [class.text-sage-700]="c.orders_count > 0"
+                                      [class.bg-cream-100]="c.orders_count === 0" [class.text-slate-400]="c.orders_count === 0">{{ c.orders_count }}</span>
+                            </td>
+                            <td class="py-2.5 px-3 text-right tabular-nums font-semibold text-slate-700 hidden md:table-cell">
+                                <span *ngIf="hasMoney(c.total_ars)">{{ fmtMoney(c.total_ars, 'ARS') }}</span>
+                                <span *ngIf="hasMoney(c.total_usd)" class="block text-xs text-brand-700">{{ fmtMoney(c.total_usd, 'USD') }}</span>
+                                <span *ngIf="!hasMoney(c.total_ars) && !hasMoney(c.total_usd)" class="text-slate-300">—</span>
+                            </td>
+                            <td class="py-2.5 px-3 text-slate-500 text-xs hidden lg:table-cell">{{ fmtDate(c.last_active) }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </ng-container>
+
+    <div *ngIf="loadingDetail()" class="text-center py-16 text-slate-400">Cargando cliente…</div>
+
+    <!-- ============ DETALLE ============ -->
+    <ng-container *ngIf="selected() as d">
+        <!-- Header -->
+        <div class="flex items-center gap-3 flex-wrap">
+            <button (click)="back()" class="btn-ghost text-sm">← Volver</button>
+            <div class="flex-1 min-w-0">
+                <h2 class="font-display text-xl md:text-2xl font-bold text-slate-800 truncate">{{ d.full_name || d.username }}</h2>
+                <p class="text-xs md:text-sm text-slate-500">
+                    {{ '@' + d.username }}
+                    <span *ngIf="d.profile?.company_name"> · {{ d.profile?.company_name }}</span>
+                    · cliente desde {{ fmtDay(d.created_at) }}
+                </p>
+            </div>
+        </div>
+
+        <!-- Resumen rápido -->
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+            <div class="card p-3 text-center">
+                <div class="text-2xl font-bold text-slate-800 tabular-nums">{{ d.stats.visits }}</div>
+                <div class="text-xs text-slate-500">Inicios de sesión</div>
+            </div>
+            <div class="card p-3 text-center">
+                <div class="text-2xl font-bold text-slate-800 tabular-nums">{{ countOf('product_view') }}</div>
+                <div class="text-xs text-slate-500">Productos vistos</div>
+            </div>
+            <div class="card p-3 text-center">
+                <div class="text-2xl font-bold text-slate-800 tabular-nums">{{ countOf('add_to_cart') }}</div>
+                <div class="text-xs text-slate-500">Agregados al carrito</div>
+            </div>
+            <div class="card p-3 text-center">
+                <div class="text-2xl font-bold text-slate-800 tabular-nums">{{ countOf('search') }}</div>
+                <div class="text-xs text-slate-500">Búsquedas</div>
+            </div>
+            <div class="card p-3 text-center">
+                <div class="text-2xl font-bold text-sage-700 tabular-nums">{{ d.stats.orders_count }}</div>
+                <div class="text-xs text-slate-500">Compras</div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="inline-flex rounded-lg border border-cream-200 bg-white p-1 shadow-soft">
+            <button (click)="tab.set('datos')" class="rounded-md px-3 py-1.5 text-sm font-medium transition"
+                    [class.bg-brand-500]="tab()==='datos'" [class.text-white]="tab()==='datos'" [class.text-slate-600]="tab()!=='datos'">Datos</button>
+            <button (click)="tab.set('actividad')" class="rounded-md px-3 py-1.5 text-sm font-medium transition"
+                    [class.bg-brand-500]="tab()==='actividad'" [class.text-white]="tab()==='actividad'" [class.text-slate-600]="tab()!=='actividad'">Actividad</button>
+            <button (click)="tab.set('compras')" class="rounded-md px-3 py-1.5 text-sm font-medium transition"
+                    [class.bg-brand-500]="tab()==='compras'" [class.text-white]="tab()==='compras'" [class.text-slate-600]="tab()!=='compras'">Compras ({{ d.orders.length }})</button>
+        </div>
+
+        <!-- ===== TAB DATOS ===== -->
+        <div *ngIf="tab()==='datos'" class="card p-4 md:p-6">
+            <p class="text-sm text-slate-500 mb-4">Datos de facturación y contacto del cliente. Completá solo lo que tengas — ningún campo es obligatorio.</p>
+            <div class="grid gap-4 md:grid-cols-2">
+                <div>
+                    <label class="label mb-1 block">Razón social / Nombre comercial</label>
+                    <input class="input" [(ngModel)]="form.company_name" name="company_name" />
+                </div>
+                <div>
+                    <label class="label mb-1 block">CUIT / CUIL</label>
+                    <input class="input" [(ngModel)]="form.tax_id" name="tax_id" />
+                </div>
+                <div>
+                    <label class="label mb-1 block">Condición frente al IVA</label>
+                    <input class="input" [(ngModel)]="form.tax_condition" name="tax_condition" placeholder="Resp. Inscripto, Monotributo…" />
+                </div>
+                <div>
+                    <label class="label mb-1 block">Persona de contacto</label>
+                    <input class="input" [(ngModel)]="form.contact_name" name="contact_name" />
+                </div>
+                <div>
+                    <label class="label mb-1 block">Email</label>
+                    <input class="input" [(ngModel)]="form.email" name="email" type="email" />
+                </div>
+                <div>
+                    <label class="label mb-1 block">Teléfono</label>
+                    <input class="input" [(ngModel)]="form.phone" name="phone" />
+                </div>
+                <div class="md:col-span-2">
+                    <label class="label mb-1 block">Domicilio</label>
+                    <input class="input" [(ngModel)]="form.address_street" name="address_street" placeholder="Calle y número" />
+                </div>
+                <div>
+                    <label class="label mb-1 block">Localidad</label>
+                    <input class="input" [(ngModel)]="form.address_city" name="address_city" />
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="label mb-1 block">Provincia</label>
+                        <input class="input" [(ngModel)]="form.address_state" name="address_state" />
+                    </div>
+                    <div>
+                        <label class="label mb-1 block">Código postal</label>
+                        <input class="input" [(ngModel)]="form.address_zip" name="address_zip" />
+                    </div>
+                </div>
+                <div class="md:col-span-2">
+                    <label class="label mb-1 block">Notas internas</label>
+                    <textarea class="input min-h-[80px]" [(ngModel)]="form.notes" name="notes"></textarea>
+                </div>
+            </div>
+            <div class="flex items-center gap-3 mt-5">
+                <button class="btn-primary" (click)="save()" [disabled]="saving()">{{ saving() ? 'Guardando…' : 'Guardar datos' }}</button>
+                <span *ngIf="saved()" class="text-sm text-sage-700">✓ Guardado</span>
+            </div>
+        </div>
+
+        <!-- ===== TAB ACTIVIDAD ===== -->
+        <div *ngIf="tab()==='actividad'" class="space-y-4">
+            <div class="grid gap-4 lg:grid-cols-3">
+                <!-- Productos más vistos -->
+                <div class="card p-4 lg:col-span-1">
+                    <h3 class="font-semibold text-slate-800 mb-3">Productos más vistos</h3>
+                    <p *ngIf="!d.stats.top_products.length" class="text-sm text-slate-400">Sin datos todavía.</p>
+                    <ol class="space-y-2">
+                        <li *ngFor="let t of d.stats.top_products; let i = index" class="flex items-center gap-2 text-sm">
+                            <span class="w-5 h-5 rounded-full bg-cream-200 text-slate-600 text-xs flex items-center justify-center flex-shrink-0">{{ i + 1 }}</span>
+                            <span class="flex-1 min-w-0 truncate text-slate-700" [title]="t.label || ''">{{ t.label || ('#' + t.ref_id) }}</span>
+                            <span class="badge bg-brand-50 text-brand-700">{{ t.count }}</span>
+                        </li>
+                    </ol>
+                </div>
+
+                <!-- Línea de tiempo -->
+                <div class="card p-4 lg:col-span-2">
+                    <h3 class="font-semibold text-slate-800 mb-1">Línea de tiempo</h3>
+                    <p class="text-xs text-slate-500 mb-3">Primera actividad: {{ fmtDate(d.stats.first_active) }} · Última: {{ fmtDate(d.stats.last_active) }}</p>
+                    <p *ngIf="!d.recent_activity.length" class="text-sm text-slate-400">Sin actividad registrada.</p>
+                    <ul class="space-y-2.5 max-h-[420px] overflow-y-auto pr-1">
+                        <li *ngFor="let e of d.recent_activity" class="flex items-start gap-2.5 text-sm">
+                            <span class="mt-1.5 w-2 h-2 rounded-full flex-shrink-0" [ngClass]="eventColor(e.event_type)"></span>
+                            <div class="flex-1 min-w-0">
+                                <div class="text-slate-700">{{ eventText(e.event_type, e.label) }}</div>
+                                <div class="text-xs text-slate-400">{{ fmtDate(e.created_at) }}</div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== TAB COMPRAS ===== -->
+        <div *ngIf="tab()==='compras'" class="space-y-3">
+            <p *ngIf="!d.orders.length" class="card p-8 text-center text-slate-500">Este cliente todavía no realizó compras.</p>
+
+            <div *ngFor="let o of d.orders" class="card overflow-hidden">
+                <button class="w-full flex items-center justify-between gap-3 px-4 py-3 hover:bg-cream-50 transition text-left" (click)="toggleOrder(o.id)">
+                    <div>
+                        <div class="font-semibold text-slate-800">Orden #{{ o.id }}</div>
+                        <div class="text-xs text-slate-500">{{ fmtDate(o.created_at) }} · {{ o.items.length }} ítem(s)<span *ngIf="o.payment_name"> · {{ o.payment_name }}</span></div>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-bold text-slate-800 tabular-nums">{{ orderTotalLabel(o) }}</div>
+                        <div class="text-xs text-brand-600">{{ openOrders.has(o.id) ? 'Ocultar' : 'Ver detalle' }}</div>
+                    </div>
+                </button>
+                <div *ngIf="openOrders.has(o.id)" class="border-t border-cream-200">
+                    <table class="w-full text-sm">
+                        <thead class="bg-cream-50 text-slate-500">
+                            <tr>
+                                <th class="py-2 px-4 text-left text-xs font-semibold uppercase">Producto</th>
+                                <th class="py-2 px-3 text-center text-xs font-semibold uppercase">Cant.</th>
+                                <th class="py-2 px-3 text-right text-xs font-semibold uppercase">P. unit.</th>
+                                <th class="py-2 px-4 text-right text-xs font-semibold uppercase">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-cream-100">
+                            <tr *ngFor="let it of o.items">
+                                <td class="py-2 px-4">
+                                    <div class="text-slate-700">{{ it.product_name }}</div>
+                                    <div class="text-xs text-slate-400">{{ it.supplier_name }}<span *ngIf="it.product_code"> · {{ it.product_code }}</span></div>
+                                </td>
+                                <td class="py-2 px-3 text-center tabular-nums">{{ it.quantity }}</td>
+                                <td class="py-2 px-3 text-right tabular-nums">{{ fmtMoney(it.unit_price_final, it.currency) }}</td>
+                                <td class="py-2 px-4 text-right tabular-nums font-medium">{{ fmtMoney(it.line_total, it.currency) }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div *ngIf="o.customer_notes" class="px-4 py-2 text-xs text-slate-500 border-t border-cream-100">Nota: {{ o.customer_notes }}</div>
+                </div>
+            </div>
+        </div>
+    </ng-container>
+</div>
