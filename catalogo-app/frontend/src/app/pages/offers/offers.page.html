@@ -37,28 +37,12 @@
                 </p>
                 <h3 class="font-semibold text-slate-700 leading-snug line-clamp-2" [title]="p.name">{{ p.name }}</h3>
                 <p *ngIf="p.code" class="text-xs text-slate-500 font-mono">{{ p.code }}</p>
-                <div class="mt-auto pt-2 flex items-center justify-between gap-2">
+                <div class="mt-auto pt-2">
                     <div class="min-w-0">
                         <span class="block text-xs text-slate-400 line-through leading-none">{{ fmtPrice(p.price, p.currency) }}</span>
                         <span class="text-base font-bold text-blush-600">{{ fmtPrice(p.offer_price, p.currency) }}</span>
                         <span class="text-[10px] font-normal text-slate-400">+ IVA</span>
                     </div>
-                    <button *ngIf="!cart.has(p.id); else inCartGrid" (click)="addToCart(p, $event)"
-                            class="w-10 h-10 rounded-lg bg-brand-500 text-white hover:bg-brand-600 transition flex items-center justify-center flex-shrink-0 shadow-soft"
-                            aria-label="Agregar a la orden" title="Agregar a la orden">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m-7-7h14"/>
-                        </svg>
-                    </button>
-                    <ng-template #inCartGrid>
-                        <div class="inline-flex items-center rounded-lg bg-sage-100 border border-sage-300 flex-shrink-0" (click)="$event.stopPropagation()">
-                            <button (click)="cart.update(p.id, cart.quantityOf(p.id) - 1)"
-                                    class="w-7 h-9 text-sage-700 font-bold rounded-l-lg text-base hover:bg-sage-200">−</button>
-                            <span class="min-w-[24px] text-center text-xs font-bold text-sage-700 tabular-nums">{{ cart.quantityOf(p.id) }}</span>
-                            <button (click)="cart.update(p.id, cart.quantityOf(p.id) + 1)"
-                                    class="w-7 h-9 text-sage-700 font-bold rounded-r-lg text-base hover:bg-sage-200">+</button>
-                        </div>
-                    </ng-template>
                 </div>
                 <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
                     <button *ngIf="p.payment_conditions?.length" (click)="openConditions(p, $event)"
