@@ -51,16 +51,6 @@
                     </svg>
                     Comprar
                 </button>
-                <div class="mt-2 flex items-stretch gap-2" (click)="$event.stopPropagation()">
-                    <button *ngIf="p.payment_conditions?.length" (click)="openConditions(p, $event)"
-                            class="flex-1 min-w-0 inline-flex items-center justify-center rounded-lg bg-sage-100 text-sage-700 hover:bg-sage-200 transition font-semibold text-[10px] sm:text-[11px] px-1.5 py-2 text-center leading-tight break-words">
-                        Condiciones
-                    </button>
-                    <button (click)="openStock(p, $event)"
-                            class="flex-1 min-w-0 inline-flex items-center justify-center rounded-lg bg-brand-50 text-brand-700 hover:bg-brand-100 transition font-semibold text-[10px] sm:text-[11px] px-1.5 py-2 text-center leading-tight break-words">
-                        Consultar stock
-                    </button>
-                </div>
             </div>
         </div>
     </div>
