@@ -12,19 +12,29 @@
         <div class="grid md:grid-cols-2 gap-0 overflow-y-auto">
             <!-- Images column -->
             <div class="bg-cream-50 p-4 md:p-6 flex flex-col gap-3">
-                <div class="aspect-square rounded-xl bg-white border border-cream-200 flex items-center justify-center overflow-hidden">
+                <div class="relative aspect-square rounded-xl bg-white border border-cream-200 flex items-center justify-center overflow-hidden">
                     <img *ngIf="product.images.length; else noimg"
-                         [src]="zoomed() || product.images[0].src"
+                         [src]="currentImage()"
                          class="w-full h-full object-contain cursor-zoom-in"
-                         (click)="zoomed.set(zoomed() ? null : product.images[0].src)"
-                         alt=""/>
+                         (click)="openLightbox()"
+                         alt="Tocá para ampliar"/>
                     <ng-template #noimg>
                         <div class="text-cream-300 text-6xl">📦</div>
                     </ng-template>
+                    <!-- Botón lupa: ampliar imagen -->
+                    <button *ngIf="product.images.length" type="button" (click)="openLightbox()"
+                            class="absolute bottom-2 right-2 w-9 h-9 rounded-full bg-white/90 hover:bg-white shadow flex items-center justify-center text-slate-600 hover:text-slate-900 transition"
+                            title="Ampliar imagen" aria-label="Ampliar imagen">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.35-4.35M11 6v4m0 0v4m0-4H7m4 0h4M18 11a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"/>
+                        </svg>
+                    </button>
                 </div>
                 <div *ngIf="product.images.length > 1" class="grid grid-cols-4 gap-2">
                     <button *ngFor="let im of product.images.slice(0, 8)"
-                            class="aspect-square rounded-md overflow-hidden bg-white border border-cream-200 hover:ring-2 hover:ring-brand-400 transition"
+                            class="aspect-square rounded-md overflow-hidden bg-white border transition"
+                            [class.ring-2]="currentImage() === im.src" [class.ring-brand-400]="currentImage() === im.src"
+                            [class.border-cream-200]="currentImage() !== im.src"
                             (click)="zoomed.set(im.src)">
                         <img [src]="im.src" class="w-full h-full object-cover" alt=""/>
                     </button>
@@ -126,4 +136,17 @@
             </div>
         </div>
     </div>
+</div>
+
+<!-- Visor a pantalla completa (lightbox) -->
+<div *ngIf="lightbox() as src"
+     class="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 p-4 cursor-zoom-out"
+     (click)="closeLightbox()">
+    <img [src]="src" class="max-w-full max-h-full object-contain select-none" (click)="$event.stopPropagation()" alt=""/>
+    <button type="button" (click)="closeLightbox()" aria-label="Cerrar"
+            class="absolute top-4 right-4 w-11 h-11 rounded-full bg-white/15 hover:bg-white/25 text-white flex items-center justify-center">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>
+        </svg>
+    </button>
 </div>

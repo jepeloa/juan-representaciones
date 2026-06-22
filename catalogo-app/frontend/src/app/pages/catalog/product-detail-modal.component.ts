@@ -16,7 +16,8 @@ export class ProductDetailModalComponent {
     @Output() viewConditions = new EventEmitter<ProductDetail>();
     @Output() viewStock = new EventEmitter<ProductDetail>();
 
-    zoomed = signal<string | null>(null);
+    zoomed = signal<string | null>(null);      // miniatura seleccionada (imagen principal)
+    lightbox = signal<string | null>(null);     // imagen ampliada a pantalla completa
 
     constructor(public cart: CartService) {}
 
@@ -24,8 +25,23 @@ export class ProductDetailModalComponent {
         return !!this.product?.payment_conditions?.length;
     }
 
+    /** Imagen que se ve actualmente en el recuadro principal. */
+    currentImage(): string {
+        return this.zoomed() || this.product?.images?.[0]?.src || '';
+    }
+
+    openLightbox(src?: string) {
+        const s = src || this.currentImage();
+        if (s) this.lightbox.set(s);
+    }
+
+    closeLightbox() {
+        this.lightbox.set(null);
+    }
+
     onClose() {
         this.zoomed.set(null);
+        this.lightbox.set(null);
         this.close.emit();
     }
 
