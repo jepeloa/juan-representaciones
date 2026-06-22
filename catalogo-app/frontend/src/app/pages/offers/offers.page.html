@@ -44,6 +44,13 @@
                         <span class="text-[10px] font-normal text-slate-400">+ IVA</span>
                     </div>
                 </div>
+                <button (click)="openDetail(p); $event.stopPropagation()"
+                        class="mt-2 w-full inline-flex items-center justify-center gap-1.5 rounded-lg bg-brand-500 text-white hover:bg-brand-600 transition font-semibold text-sm px-3 py-2 shadow-soft">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272"/>
+                    </svg>
+                    Comprar
+                </button>
                 <div class="mt-2 flex items-stretch gap-2" (click)="$event.stopPropagation()">
                     <button *ngIf="p.payment_conditions?.length" (click)="openConditions(p, $event)"
                             class="flex-1 min-w-0 inline-flex items-center justify-center gap-1 rounded-lg bg-sage-100 text-sage-700 hover:bg-sage-200 transition font-semibold text-[11px] px-2 py-2 text-center leading-tight">
