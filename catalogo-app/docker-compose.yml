@@ -33,6 +33,12 @@ services:
             INITIAL_ADMIN_USER: ${INITIAL_ADMIN_USER:-juan}
             INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD:-juan2026}
             CORS_ORIGINS: "*"
+            SMTP_HOST: ${SMTP_HOST:-}
+            SMTP_PORT: ${SMTP_PORT:-587}
+            SMTP_USER: ${SMTP_USER:-}
+            SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+            SMTP_FROM: ${SMTP_FROM:-}
+            SMTP_USE_TLS: ${SMTP_USE_TLS:-true}
         volumes:
             # Mounted so the import script can read the local Excel + images
             - ${DATA_DIR:-./data}:/data:ro
