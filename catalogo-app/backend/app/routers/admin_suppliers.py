@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.auth.deps import require_admin
 from app.database import get_db
 from app.models import Supplier, Product, PaymentCondition, User
-from app.schemas import SupplierOut, PaymentConditionBrief, SupplierConditionsIn, SupplierUpdateIn
+from app.schemas import SupplierOut, PaymentConditionBrief, SupplierConditionsIn, SupplierUpdateIn, ActiveIn
 from app.routers.admin_products import _save_image_file
 
 router = APIRouter(prefix='/api/admin/suppliers', tags=['admin-suppliers'])
@@ -60,12 +60,28 @@ def _out(db: Session, sup: Supplier) -> SupplierOut:
         select(func.count(Product.id)).where(Product.supplier_id == sup.id)
     ).scalar_one()
     return SupplierOut(
-        id=sup.id, name=sup.name, slug=sup.slug, image=sup.image, product_count=cnt,
+        id=sup.id, name=sup.name, slug=sup.slug, image=sup.image, product_count=cnt, is_active=sup.is_active,
         payment_conditions=[
             PaymentConditionBrief(id=c.id, name=c.name, description=c.description)
             for c in sup.payment_conditions
         ],
     )
+
+
+@router.patch('/{supplier_id}/active', response_model=SupplierOut)
+def set_supplier_active(
+    supplier_id: int,
+    body: ActiveIn,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_admin),
+):
+    sup = db.get(Supplier, supplier_id)
+    if not sup:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, 'Marca no encontrada')
+    sup.is_active = body.active
+    db.commit()
+    db.refresh(sup)
+    return _out(db, sup)
 
 
 @router.put('/{supplier_id}/conditions', response_model=SupplierOut)

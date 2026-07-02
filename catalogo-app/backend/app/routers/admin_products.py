@@ -18,7 +18,7 @@ import io
 from app.auth.deps import require_admin
 from app.database import get_db
 from app.models import Product, ProductImage, Supplier, Category, PaymentCondition, User
-from app.schemas import ProductWriteIn, ProductDetailOut, ProductImageOut
+from app.schemas import ProductWriteIn, ProductDetailOut, ProductImageOut, ActiveIn
 from app.routers.products import _row_to_out
 
 router = APIRouter(prefix='/api/admin/products', tags=['admin-products'])
@@ -287,6 +287,28 @@ async def update_product(
             selectinload(Product.images),
         ).where(Product.id == product.id)
     ).scalar_one()
+    return _serialize(product)
+
+
+@router.patch('/{product_id}/active', response_model=ProductDetailOut)
+def set_product_active(
+    product_id: int,
+    body: ActiveIn,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(require_admin),
+):
+    product = db.execute(
+        select(Product).options(
+            selectinload(Product.supplier).selectinload(Supplier.payment_conditions),
+            selectinload(Product.category),
+            selectinload(Product.images),
+        ).where(Product.id == product_id)
+    ).scalar_one_or_none()
+    if not product:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, 'Producto no encontrado')
+    product.is_active = body.active
+    db.commit()
+    db.refresh(product)
     return _serialize(product)
 
 

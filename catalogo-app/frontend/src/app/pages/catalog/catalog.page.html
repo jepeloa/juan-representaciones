@@ -229,11 +229,16 @@
 
     <!-- GRID VIEW -->
     <div *ngIf="view() === 'grid'" class="grid gap-4 md:gap-5 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-        <div *ngFor="let p of products()" class="card overflow-hidden flex flex-col cursor-pointer hover:shadow-lift transition" (click)="openDetail(p)">
+        <div *ngFor="let p of products()" class="card overflow-hidden flex flex-col cursor-pointer hover:shadow-lift transition"
+             [class.opacity-60]="isAdmin && p.is_active === false" (click)="openDetail(p)">
             <div class="relative aspect-square bg-cream-100 flex items-center justify-center overflow-hidden">
                 <span *ngIf="isOnOffer(p)"
                       class="absolute top-2 left-2 z-10 inline-flex items-center rounded-full bg-blush-500 text-white text-xs font-bold px-2 py-0.5 shadow-soft">
                     {{ offerPct(p) > 0 ? '-' + offerPct(p) + '%' : 'OFERTA' }}
+                </span>
+                <span *ngIf="isAdmin && p.is_active === false"
+                      class="absolute top-2 right-2 z-10 inline-flex items-center rounded-full bg-slate-700 text-white text-[11px] font-semibold px-2 py-0.5 shadow-soft">
+                    Inhabilitado
                 </span>
                 <img *ngIf="p.thumbnail; else noimgcard" [src]="p.thumbnail" loading="lazy" class="w-full h-full object-cover" alt=""/>
                 <ng-template #noimgcard>
@@ -269,6 +274,12 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272"/>
                     </svg>
                     Comprar
+                </button>
+                <button *ngIf="isAdmin" (click)="toggleProductActive(p, $event)"
+                        class="mt-1 w-full inline-flex items-center justify-center gap-1.5 rounded-lg border transition font-medium text-xs px-3 py-1.5"
+                        [class.border-sage-300]="p.is_active === false" [class.text-sage-700]="p.is_active === false" [class.hover:bg-sage-50]="p.is_active === false"
+                        [class.border-cream-200]="p.is_active !== false" [class.text-slate-500]="p.is_active !== false" [class.hover:bg-cream-100]="p.is_active !== false">
+                    {{ p.is_active === false ? 'Habilitar' : 'Inhabilitar' }}
                 </button>
             </div>
         </div>

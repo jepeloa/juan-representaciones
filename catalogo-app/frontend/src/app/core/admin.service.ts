@@ -100,6 +100,9 @@ export class AdminService {
     deleteProduct(id: number): Observable<void> {
         return this.http.delete<void>(`${API_BASE}/admin/products/${id}`);
     }
+    setProductActive(id: number, active: boolean): Observable<ProductDetail> {
+        return this.http.patch<ProductDetail>(`${API_BASE}/admin/products/${id}/active`, { active });
+    }
 
     // ===== Payment conditions =====
     listConditions(): Observable<AdminPaymentCondition[]> {
@@ -143,6 +146,9 @@ export class AdminService {
     }
     deleteSupplier(supplierId: number): Observable<void> {
         return this.http.delete<void>(`${API_BASE}/admin/suppliers/${supplierId}`);
+    }
+    setSupplierActive(supplierId: number, active: boolean): Observable<Supplier> {
+        return this.http.patch<Supplier>(`${API_BASE}/admin/suppliers/${supplierId}/active`, { active });
     }
 
     // ===== Destacados (orden por sección) =====

@@ -126,6 +126,17 @@ export class SuppliersPage implements OnInit {
         });
     }
 
+    toggleActive(supplier: Supplier, ev: Event) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        const next = !(supplier.is_active ?? true);
+        if (!next && !confirm(`¿Inhabilitar la marca "${supplier.name}"? No se mostrará a los clientes (ni sus productos). Podés volver a habilitarla cuando quieras.`)) return;
+        this.admin.setSupplierActive(supplier.id, next).subscribe({
+            next: updated => this.suppliers.update(list => list.map(s => s.id === updated.id ? { ...s, is_active: updated.is_active } : s)),
+            error: err => alert(err?.error?.detail || 'No se pudo cambiar el estado de la marca'),
+        });
+    }
+
     clearImage(supplier: Supplier, ev: Event) {
         ev.preventDefault();
         ev.stopPropagation();

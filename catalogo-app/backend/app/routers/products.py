@@ -31,6 +31,7 @@ def _row_to_out(product: Product) -> ProductOut:
         supplier_name=product.supplier.name if product.supplier else '',
         category_id=product.category_id,
         category_name=product.category.name if product.category else None,
+        is_active=product.is_active,
         # Las condiciones de pago ahora viven en la MARCA (no en el producto)
         payment_conditions=[
             PaymentConditionBrief(id=c.id, name=c.name, description=c.description)
@@ -55,13 +56,20 @@ def list_products(
     page: int = Query(1, ge=1),
     page_size: int = Query(60, ge=1, le=200),
     db: Session = Depends(get_db),
-    _: User = Depends(get_current_user),
+    user: User = Depends(get_current_user),
 ):
     stmt = select(Product).options(
         selectinload(Product.supplier).selectinload(Supplier.payment_conditions),
         selectinload(Product.category),
         selectinload(Product.images),
     )
+    # El cliente no ve productos inhabilitados ni de marcas inhabilitadas.
+    # El admin ve todo (con el flag is_active) para poder reactivarlos.
+    if not user.is_admin:
+        stmt = stmt.where(
+            Product.is_active.is_(True),
+            Product.supplier.has(Supplier.is_active.is_(True)),
+        )
     if supplier_id:
         stmt = stmt.where(Product.supplier_id == supplier_id)
     if category_id:
@@ -151,23 +159,32 @@ def list_products(
 
 
 @router.get('/facets', response_model=FacetsOut)
-def get_facets(db: Session = Depends(get_db), _: User = Depends(get_current_user)):
+def get_facets(db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    # Para el cliente, contar/mostrar solo lo habilitado.
+    prod_join = Product.supplier_id == Supplier.id
+    active_filter = []
+    if not user.is_admin:
+        prod_join = and_(prod_join, Product.is_active.is_(True))
+        active_filter = [Product.is_active.is_(True), Product.supplier.has(Supplier.is_active.is_(True))]
+
     suppliers_q = (
         select(Supplier, func.count(Product.id).label('cnt'))
-        .join(Product, Product.supplier_id == Supplier.id, isouter=True)
+        .join(Product, prod_join, isouter=True)
         .group_by(Supplier.id)
         .order_by(Supplier.name)
     )
+    if not user.is_admin:
+        suppliers_q = suppliers_q.where(Supplier.is_active.is_(True))
     suppliers = []
     for sup, cnt in db.execute(suppliers_q).all():
-        suppliers.append(SupplierOut(id=sup.id, name=sup.name, slug=sup.slug, product_count=cnt))
+        suppliers.append(SupplierOut(id=sup.id, name=sup.name, slug=sup.slug, is_active=sup.is_active, product_count=cnt))
 
     currencies = [c for c, in db.execute(
-        select(Product.currency).where(Product.currency.is_not(None)).distinct().order_by(Product.currency)
+        select(Product.currency).where(Product.currency.is_not(None), *active_filter).distinct().order_by(Product.currency)
     ).all()]
 
     min_p, max_p, total = db.execute(
-        select(func.min(Product.price), func.max(Product.price), func.count(Product.id))
+        select(func.min(Product.price), func.max(Product.price), func.count(Product.id)).where(*active_filter)
     ).one()
 
     return FacetsOut(
@@ -180,7 +197,7 @@ def get_facets(db: Session = Depends(get_db), _: User = Depends(get_current_user
 
 
 @router.get('/{product_id}', response_model=ProductDetailOut)
-def get_product(product_id: int, db: Session = Depends(get_db), _: User = Depends(get_current_user)):
+def get_product(product_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     p = db.execute(
         select(Product)
         .options(
@@ -191,6 +208,9 @@ def get_product(product_id: int, db: Session = Depends(get_db), _: User = Depend
         .where(Product.id == product_id)
     ).scalar_one_or_none()
     if not p:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, 'Producto no encontrado')
+    # El cliente no puede abrir un producto inhabilitado o de marca inhabilitada.
+    if not user.is_admin and (not p.is_active or (p.supplier and not p.supplier.is_active)):
         raise HTTPException(status.HTTP_404_NOT_FOUND, 'Producto no encontrado')
     base = _row_to_out(p).model_dump()
     return ProductDetailOut(

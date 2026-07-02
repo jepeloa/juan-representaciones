@@ -17,6 +17,7 @@ export interface Supplier {
     slug: string;
     image: string | null;
     product_count: number;
+    is_active?: boolean;
     payment_conditions: { id: number; name: string; description?: string | null }[];
 }
 
@@ -41,6 +42,7 @@ export interface Product {
     supplier_name: string;
     category_id: number | null;
     category_name: string | null;
+    is_active?: boolean;
     payment_conditions: { id: number; name: string; description?: string | null }[];
     thumbnail: string | null;
 }

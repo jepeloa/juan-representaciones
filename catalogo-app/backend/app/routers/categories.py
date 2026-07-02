@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy import select, func
+from sqlalchemy import select, func, and_
 from sqlalchemy.orm import Session
 
 from app.auth.deps import get_current_user
@@ -14,17 +14,21 @@ router = APIRouter(prefix='/api/categories', tags=['categories'])
 def list_categories(
     supplier_id: int | None = Query(None),
     db: Session = Depends(get_db),
-    _: User = Depends(get_current_user),
+    user: User = Depends(get_current_user),
 ):
     # Deduplicado por NOMBRE: la misma categoría existe por proveedor, pero en el
     # filtro debe aparecer una sola vez y traer productos de todas las marcas.
+    # Cliente: contar solo productos habilitados.
+    prod_join = Product.category_id == Category.id
+    if not user.is_admin:
+        prod_join = and_(prod_join, Product.is_active.is_(True))
     q = (
         select(
             Category.name.label('name'),
             func.count(Product.id).label('cnt'),
             func.min(Category.id).label('id'),
         )
-        .join(Product, Product.category_id == Category.id, isouter=True)
+        .join(Product, prod_join, isouter=True)
         .group_by(Category.name)
         .order_by(Category.name)
     )

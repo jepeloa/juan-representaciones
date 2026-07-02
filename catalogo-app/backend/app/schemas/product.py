@@ -17,6 +17,7 @@ class SupplierOut(BaseModel):
     slug: str
     image: str | None = None
     product_count: int | None = None
+    is_active: bool = True
     payment_conditions: list[PaymentConditionBrief] = []
 
     class Config:
@@ -56,6 +57,7 @@ class ProductOut(BaseModel):
     supplier_name: str
     category_id: int | None
     category_name: str | None
+    is_active: bool = True
     payment_conditions: list[PaymentConditionBrief] = []  # condiciones de pago asociadas (N)
     thumbnail: str | None
 

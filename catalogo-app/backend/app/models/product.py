@@ -44,6 +44,8 @@ class Product(Base):
     barcode: Mapped[str | None] = mapped_column(String(60), nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     source_file: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    # Producto habilitado. Si es False, no se muestra al cliente.
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, server_default='1', index=True)
 
     supplier: Mapped['Supplier'] = relationship(back_populates='products')  # noqa: F821
     category: Mapped['Category | None'] = relationship(back_populates='products')  # noqa: F821

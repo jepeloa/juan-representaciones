@@ -57,6 +57,11 @@ class SupplierUpdateIn(BaseModel):
     name: str = Field(min_length=1, max_length=120)
 
 
+class ActiveIn(BaseModel):
+    """Habilitar/inhabilitar una marca o producto."""
+    active: bool
+
+
 class FeaturedOrderIn(BaseModel):
     """Orden de destacados: lista de product_id en el orden deseado."""
     product_ids: list[int] = []

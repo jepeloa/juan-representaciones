@@ -9,6 +9,7 @@ import { CartService } from '../../core/cart.service';
 import { AuthService } from '../../core/auth.service';
 import { SearchService } from '../../core/search.service';
 import { ActivityService } from '../../core/activity.service';
+import { AdminService } from '../../core/admin.service';
 import { Category, Facets, Product, ProductDetail, Supplier } from '../../core/models';
 import { ProductDetailModalComponent } from './product-detail-modal.component';
 
@@ -66,6 +67,17 @@ export class CatalogPage implements OnInit {
         return !!p.payment_conditions && p.payment_conditions.length > 0;
     }
 
+    /** Admin: habilitar/inhabilitar un producto (el cliente no ve los inhabilitados). */
+    toggleProductActive(p: Product, ev: Event) {
+        ev.stopPropagation();
+        const next = !(p.is_active ?? true);
+        if (!next && !confirm(`¿Inhabilitar "${p.name}"? No se mostrará a los clientes. Podés volver a habilitarlo cuando quieras.`)) return;
+        this.admin.setProductActive(p.id, next).subscribe({
+            next: () => this.products.update(list => list.map(x => x.id === p.id ? { ...x, is_active: next } : x)),
+            error: err => alert(err?.error?.detail || 'No se pudo cambiar el estado del producto'),
+        });
+    }
+
     supplierId: number | null = null;
     categoryName: string | null = null;
     currency = '';
@@ -92,6 +104,7 @@ export class CatalogPage implements OnInit {
         private route: ActivatedRoute,
         private router: Router,
         private activity: ActivityService,
+        private admin: AdminService,
     ) {
         this.search$.pipe(debounceTime(300)).subscribe(() => this.fetch());
         // El texto de búsqueda es global (shell + página): al cambiar, recargar.

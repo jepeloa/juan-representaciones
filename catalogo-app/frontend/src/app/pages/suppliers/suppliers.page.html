@@ -5,8 +5,11 @@
     </div>
 
     <div class="grid gap-4 md:gap-5 grid-cols-2 md:grid-cols-3 lg:grid-cols-4 items-start">
-        <div *ngFor="let s of suppliers()" class="card overflow-hidden flex flex-col hover:shadow-lift transition group">
-            <a [routerLink]="['/catalogo']" [queryParams]="{ supplier: s.id }" class="block bg-cream-100">
+        <div *ngFor="let s of suppliers()" class="card overflow-hidden flex flex-col hover:shadow-lift transition group"
+             [class.opacity-60]="s.is_active === false">
+            <a [routerLink]="['/catalogo']" [queryParams]="{ supplier: s.id }" class="relative block bg-cream-100">
+                <span *ngIf="isAdmin && s.is_active === false"
+                      class="absolute top-2 left-2 z-10 inline-flex items-center rounded-full bg-slate-700 text-white text-[11px] font-semibold px-2 py-0.5 shadow-soft">Inhabilitada</span>
                 <img *ngIf="s.image; else noimg" [src]="s.image" loading="lazy" class="block w-full h-auto" alt=""/>
                 <ng-template #noimg>
                     <div class="aspect-[4/3] flex items-center justify-center">
@@ -44,6 +47,12 @@
                         Condiciones ({{ s.payment_conditions.length }})
                     </button>
                     <button class="btn-ghost text-xs" (click)="renameSupplier(s, $event)">Renombrar</button>
+                    <button class="btn-outline text-xs"
+                            [class.text-sage-700]="s.is_active === false"
+                            [class.text-slate-500]="s.is_active !== false"
+                            (click)="toggleActive(s, $event)">
+                        {{ s.is_active === false ? 'Habilitar' : 'Inhabilitar' }}
+                    </button>
                     <button class="btn-ghost text-xs text-blush-500 hover:bg-blush-50" (click)="deleteSupplier(s, $event)">Eliminar</button>
                 </div>
             </div>
