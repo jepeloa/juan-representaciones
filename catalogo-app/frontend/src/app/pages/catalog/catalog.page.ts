@@ -86,6 +86,24 @@ export class CatalogPage implements OnInit {
         });
     }
 
+    /** Admin: habilitar/inhabilitar en masa (respeta el filtro de marca si hay uno). */
+    async bulkActive(active: boolean) {
+        const scope = this.supplierId ? 'de esta marca' : 'del catálogo';
+        const ok = await this.confirm.ask({
+            title: active ? 'Habilitar todos' : 'Inhabilitar todos',
+            message: active
+                ? `¿Habilitar todos los productos ${scope}? Van a mostrarse a los clientes.`
+                : `¿Inhabilitar todos los productos ${scope}? Dejan de mostrarse a los clientes. Podés revertirlo.`,
+            confirmText: active ? 'Habilitar todos' : 'Inhabilitar todos',
+            danger: !active,
+        });
+        if (!ok) return;
+        this.admin.bulkSetProductsActive(active, this.supplierId).subscribe({
+            next: () => this.fetch(),
+            error: err => alert(err?.error?.detail || 'No se pudo aplicar el cambio'),
+        });
+    }
+
     supplierId: number | null = null;
     categoryName: string | null = null;
     currency = '';

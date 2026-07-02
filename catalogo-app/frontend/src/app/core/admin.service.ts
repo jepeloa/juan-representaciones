@@ -103,6 +103,9 @@ export class AdminService {
     setProductActive(id: number, active: boolean): Observable<ProductDetail> {
         return this.http.patch<ProductDetail>(`${API_BASE}/admin/products/${id}/active`, { active });
     }
+    bulkSetProductsActive(active: boolean, supplierId: number | null): Observable<{ updated: number }> {
+        return this.http.post<{ updated: number }>(`${API_BASE}/admin/products/bulk-active`, { active, supplier_id: supplierId });
+    }
 
     // ===== Payment conditions =====
     listConditions(): Observable<AdminPaymentCondition[]> {

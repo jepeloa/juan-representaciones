@@ -1,6 +1,6 @@
 """Admin: foto/logo de cada marca (Supplier.image)."""
 from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, status
-from sqlalchemy import select, func
+from sqlalchemy import select, func, update
 from sqlalchemy.orm import Session
 
 from app.auth.deps import require_admin
@@ -79,6 +79,10 @@ def set_supplier_active(
     if not sup:
         raise HTTPException(status.HTTP_404_NOT_FOUND, 'Marca no encontrada')
     sup.is_active = body.active
+    # Cascada: inhabilitar/habilitar la marca replica en todos sus productos.
+    db.execute(
+        update(Product).where(Product.supplier_id == supplier_id).values(is_active=body.active)
+    )
     db.commit()
     db.refresh(sup)
     return _out(db, sup)

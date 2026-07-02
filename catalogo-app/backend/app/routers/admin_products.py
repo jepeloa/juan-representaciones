@@ -10,7 +10,7 @@ import uuid
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session, selectinload
 from PIL import Image
 import io
@@ -18,7 +18,7 @@ import io
 from app.auth.deps import require_admin
 from app.database import get_db
 from app.models import Product, ProductImage, Supplier, Category, PaymentCondition, User
-from app.schemas import ProductWriteIn, ProductDetailOut, ProductImageOut, ActiveIn
+from app.schemas import ProductWriteIn, ProductDetailOut, ProductImageOut, ActiveIn, BulkActiveIn
 from app.routers.products import _row_to_out
 
 router = APIRouter(prefix='/api/admin/products', tags=['admin-products'])
@@ -307,9 +307,31 @@ def set_product_active(
     if not product:
         raise HTTPException(status.HTTP_404_NOT_FOUND, 'Producto no encontrado')
     product.is_active = body.active
+    # Al habilitar un producto de una marca inhabilitada, reactivar la marca
+    # (los demás productos quedan como estén).
+    if body.active and product.supplier and not product.supplier.is_active:
+        product.supplier.is_active = True
     db.commit()
     db.refresh(product)
     return _serialize(product)
+
+
+@router.post('/bulk-active')
+def bulk_set_active(
+    body: BulkActiveIn,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(require_admin),
+):
+    """Habilitar/inhabilitar en masa. Si viene supplier_id, solo esa marca; si no, todos."""
+    stmt = update(Product).values(is_active=body.active)
+    if body.supplier_id:
+        stmt = stmt.where(Product.supplier_id == body.supplier_id)
+    res = db.execute(stmt)
+    # Si habilitamos productos de una marca, asegurar que la marca quede activa.
+    if body.active and body.supplier_id:
+        db.execute(update(Supplier).where(Supplier.id == body.supplier_id).values(is_active=True))
+    db.commit()
+    return {'updated': res.rowcount}
 
 
 @router.delete('/{product_id}', status_code=status.HTTP_204_NO_CONTENT)

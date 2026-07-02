@@ -62,6 +62,12 @@ class ActiveIn(BaseModel):
     active: bool
 
 
+class BulkActiveIn(BaseModel):
+    """Habilitar/inhabilitar productos en masa (opcionalmente filtrando por marca)."""
+    active: bool
+    supplier_id: int | None = None
+
+
 class FeaturedOrderIn(BaseModel):
     """Orden de destacados: lista de product_id en el orden deseado."""
     product_ids: list[int] = []

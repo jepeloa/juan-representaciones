@@ -79,12 +79,22 @@
             <span *ngIf="!loading()">{{ total() | number:'1.0-0' }} resultado<span *ngIf="total()!==1">s</span> · Página {{ page }} de {{ pages() }}</span>
             <span *ngIf="loading()" class="inline-flex items-center gap-2"><span class="inline-block w-3 h-3 rounded-full bg-brand-400 animate-pulse"></span> Cargando…</span>
         </p>
-        <button class="btn-ghost" (click)="reset()">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke="currentColor" class="w-4 h-4">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/>
-            </svg>
-            Limpiar
-        </button>
+        <div class="flex items-center gap-2">
+            <button class="inline-flex items-center gap-1 rounded-lg border border-sage-300 text-sage-700 hover:bg-sage-50 transition text-xs font-medium px-3 py-1.5"
+                    (click)="bulkActive(true)" title="Habilitar todos los productos (de la marca filtrada, o del catálogo)">
+                Habilitar todos
+            </button>
+            <button class="inline-flex items-center gap-1 rounded-lg border border-blush-200 text-blush-500 hover:bg-blush-50 transition text-xs font-medium px-3 py-1.5"
+                    (click)="bulkActive(false)" title="Inhabilitar todos los productos (de la marca filtrada, o del catálogo)">
+                Inhabilitar todos
+            </button>
+            <button class="btn-ghost" (click)="reset()">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/>
+                </svg>
+                Limpiar
+            </button>
+        </div>
     </div>
 
     <!-- TABLE VIEW (desktop) -->
