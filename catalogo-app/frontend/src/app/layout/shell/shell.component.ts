@@ -9,6 +9,7 @@ import { AuthService } from '../../core/auth.service';
 import { CartService } from '../../core/cart.service';
 import { SearchService } from '../../core/search.service';
 import { ActivityService } from '../../core/activity.service';
+import { ConfirmDialogComponent } from '../../shared/confirm-dialog.component';
 
 interface NavItem {
     label: string;
@@ -21,7 +22,7 @@ interface NavItem {
 @Component({
     selector: 'app-shell',
     standalone: true,
-    imports: [CommonModule, FormsModule, RouterLink, RouterLinkActive, RouterOutlet],
+    imports: [CommonModule, FormsModule, RouterLink, RouterLinkActive, RouterOutlet, ConfirmDialogComponent],
     templateUrl: './shell.component.html',
 })
 export class ShellComponent {

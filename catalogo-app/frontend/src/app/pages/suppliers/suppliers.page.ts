@@ -5,6 +5,7 @@ import { RouterLink } from '@angular/router';
 import { CatalogService } from '../../core/catalog.service';
 import { AuthService } from '../../core/auth.service';
 import { AdminService, AdminPaymentCondition } from '../../core/admin.service';
+import { ConfirmService } from '../../core/confirm.service';
 import { Supplier } from '../../core/models';
 
 @Component({
@@ -27,7 +28,7 @@ export class SuppliersPage implements OnInit {
     selectedCondIds: number[] = [];
     savingConds = signal(false);
 
-    constructor(private svc: CatalogService, public auth: AuthService, private admin: AdminService) {}
+    constructor(private svc: CatalogService, public auth: AuthService, private admin: AdminService, private confirm: ConfirmService) {}
 
     get isAdmin(): boolean {
         return !!this.auth.user()?.is_admin;
@@ -116,31 +117,48 @@ export class SuppliersPage implements OnInit {
         });
     }
 
-    deleteSupplier(supplier: Supplier, ev: Event) {
+    async deleteSupplier(supplier: Supplier, ev: Event) {
         ev.preventDefault();
         ev.stopPropagation();
-        if (!confirm(`¿Eliminar la marca "${supplier.name}"?`)) return;
+        const ok = await this.confirm.ask({
+            title: 'Eliminar marca',
+            message: `¿Eliminar la marca "${supplier.name}"? Esta acción no se puede deshacer.`,
+            confirmText: 'Eliminar', danger: true,
+        });
+        if (!ok) return;
         this.admin.deleteSupplier(supplier.id).subscribe({
             next: () => this.suppliers.update(list => list.filter(s => s.id !== supplier.id)),
             error: err => alert(err?.error?.detail || 'No se pudo eliminar la marca'),
         });
     }
 
-    toggleActive(supplier: Supplier, ev: Event) {
+    async toggleActive(supplier: Supplier, ev: Event) {
         ev.preventDefault();
         ev.stopPropagation();
         const next = !(supplier.is_active ?? true);
-        if (!next && !confirm(`¿Inhabilitar la marca "${supplier.name}"? No se mostrará a los clientes (ni sus productos). Podés volver a habilitarla cuando quieras.`)) return;
+        if (!next) {
+            const ok = await this.confirm.ask({
+                title: 'Inhabilitar marca',
+                message: `¿Inhabilitar la marca "${supplier.name}"? No se mostrará a los clientes (ni sus productos). Podés volver a habilitarla cuando quieras.`,
+                confirmText: 'Inhabilitar', danger: true,
+            });
+            if (!ok) return;
+        }
         this.admin.setSupplierActive(supplier.id, next).subscribe({
             next: updated => this.suppliers.update(list => list.map(s => s.id === updated.id ? { ...s, is_active: updated.is_active } : s)),
             error: err => alert(err?.error?.detail || 'No se pudo cambiar el estado de la marca'),
         });
     }
 
-    clearImage(supplier: Supplier, ev: Event) {
+    async clearImage(supplier: Supplier, ev: Event) {
         ev.preventDefault();
         ev.stopPropagation();
-        if (!confirm(`¿Quitar la foto de "${supplier.name}"?`)) return;
+        const ok = await this.confirm.ask({
+            title: 'Quitar foto',
+            message: `¿Quitar la foto de "${supplier.name}"?`,
+            confirmText: 'Quitar', danger: true,
+        });
+        if (!ok) return;
         this.admin.clearSupplierImage(supplier.id).subscribe(updated => {
             this.suppliers.update(list => list.map(s => s.id === updated.id ? { ...s, image: null } : s));
         });
